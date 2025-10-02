@@ -17,6 +17,7 @@ from agent.terminal_ui import divider, info, answer
 
 load_dotenv()
 
+
 def setup_dependencies(provider="ollama"):
     prompts = get_prompts()
     
