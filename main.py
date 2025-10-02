@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import traceback
 """
 View `README.md` for run instructions.
 """
@@ -28,4 +29,5 @@ try:
             
 except Exception as e:
     print(f"❌ Error: {e}")
+    traceback.print_exc()  # Add this line to print the full stack trace
     print("\nReview the instructions in `README.md`")

@@ -1,0 +1,55 @@
+{
+  "sessions": [
+    {
+      "session_id": "session_1_20250914_194335",
+      "session_name": "PV_Curve_Session_openai",
+      "created_at": "2025-09-14T19:43:35.816872",
+      "last_updated": "2025-09-14T19:46:12.093206",
+      "messages": [
+        {
+          "timestamp": "2025-09-14T19:43:59.910895",
+          "user_input": "explain power factor for me",
+          "assistant_response": "Power factor is the ratio of real power to apparent power, essentially telling you how effectively a load uses electric power. In PV curve analysis, this parameter is crucial because it controls the balance between real power and reactive power consumption in the system. A lower power factor means that a larger fraction of the apparent power is reactive power, which typically causes the P-V curve—and especially the nose point—to shift downward. Conversely, a higher power factor (closer to 1.0) indicates more efficient power usage and tends to shift the curve upward. Adjusting the power factor helps simulate different load characteristics and assess voltage stability under various operating conditions.",
+          "inputs_used": {
+            "grid": "ieee39",
+            "bus_id": 5,
+            "step_size": 0.01,
+            "max_scale": 3.0,
+            "power_factor": 0.95,
+            "voltage_limit": 0.4,
+            "capacitive": false,
+            "continuation": true
+          }
+        }
+      ],
+      "conversation_history": [
+        {
+          "user_input": "explain power factor for me",
+          "assistant_response": "Power factor is the ratio of real power to apparent power, essentially telling you how effectively a load uses electric power. In PV curve analysis, this parameter is crucial because it controls the balance between real power and reactive power consumption in the system. A lower power factor means that a larger fraction of the apparent power is reactive power, which typically causes the P-V curve—and especially the nose point—to shift downward. Conversely, a higher power factor (closer to 1.0) indicates more efficient power usage and tends to shift the curve upward. Adjusting the power factor helps simulate different load characteristics and assess voltage stability under various operating conditions.",
+          "inputs_used": {
+            "grid": "ieee39",
+            "bus_id": 5,
+            "step_size": 0.01,
+            "max_scale": 3.0,
+            "power_factor": 0.95,
+            "voltage_limit": 0.4,
+            "capacitive": false,
+            "continuation": true
+          },
+          "timestamp": "2025-09-14T19:46:12.093060"
+        }
+      ],
+      "cached_results": [],
+      "metadata": {
+        "total_messages": 1,
+        "total_conversations": 1,
+        "total_cached_results": 0
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-09-14T19:43:35.816790",
+    "last_updated": "2025-09-14T19:46:12.093270",
+    "total_sessions": 1
+  }
+}

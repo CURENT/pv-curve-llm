@@ -32,4 +32,9 @@ class State(TypedDict):
     retry_count: int
     failed_node: str | None
     conversation_history: List[dict]
-    cached_results: List[dict] 
+    cached_results: List[dict]
+    # Enhanced history context fields
+    parameter_evolution: List[dict]  # Track parameter changes over time
+    simulation_trends: List[dict]  # Track simulation patterns and trends
+    user_preferences: Dict[str, Any]  # Learn user preferences from history
+    context_summary: str  # Current context summary for quick reference 

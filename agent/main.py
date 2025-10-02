@@ -7,10 +7,12 @@ import os
 from agent.vector import retriever as _make_retriever
 from agent.prompts import get_prompts
 from agent.pv_curve.pv_curve import generate_pv_curve
+from agent.history.history import ChatHistoryManager
 
 from agent.models.state_models import Inputs
 from agent.utils.common_utils import format_inputs_display, create_initial_state
 from agent.workflows.compound_workflow import create_compound_workflow
+from agent.workflows.history_aware_workflow import create_history_aware_workflow
 from agent.terminal_ui import divider, info, answer
 
 load_dotenv()
@@ -35,9 +37,12 @@ def setup_dependencies(provider="ollama"):
     
     return llm, prompts, retriever
 
-def create_graph(provider="ollama"):
+def create_graph(provider="ollama", use_history=True):
     llm, prompts, retriever = setup_dependencies(provider)
-    return create_compound_workflow(llm, prompts, retriever, generate_pv_curve)
+    if use_history:
+        return create_history_aware_workflow(llm, prompts, retriever, generate_pv_curve)
+    else:
+        return create_compound_workflow(llm, prompts, retriever, generate_pv_curve)
 
 
 def run_agent():
@@ -48,10 +53,15 @@ def run_agent():
         provider = "ollama"
     
     llm, prompts, retriever = setup_dependencies(provider)
-    graph = create_compound_workflow(llm, prompts, retriever, generate_pv_curve)
+    graph = create_graph(provider, use_history=True)  # Enable history-aware mode
     
     print(f"Using model: {llm._model_name}")
-    
+  
+    # Initialize chat history manager
+    history_manager = ChatHistoryManager("agent/history/chat_history.json")
+    session_id = history_manager.start_new_session(f"PV_Curve_Session_{provider}")
+    print(f"Chat history will be saved to: {history_manager.history_file}")
+  
     state = create_initial_state()
 
     while True:
@@ -62,17 +72,43 @@ def run_agent():
         user_input = input("\nMessage: ")
         if user_input.strip().lower() in ["quit", "q"]:
             info("Quitting...")
+            # Save final conversation history and cached results before exiting
+            if state.get("conversation_history"):
+                history_manager.add_conversation_history(session_id, state["conversation_history"])
+            if state.get("cached_results"):
+                history_manager.add_cached_results(session_id, state["cached_results"])
+            
+            # Show statistics
+            stats = history_manager.get_statistics()
+            print(f"\nSession saved with {stats['total_messages']} messages across {stats['total_sessions']} sessions")
+
             break
 
         state["messages"] = state.get("messages", []) + [HumanMessage(content=user_input)]
         
         try:
+            # Add user input tracking for history updates
+            state["last_user_input"] = user_input
+            
             new_state = graph.invoke(state, config={"recursion_limit": 50})
             
             if new_state.get("messages") and len(new_state["messages"]) > 0:
                 last_message = new_state["messages"][-1]
                 answer(last_message.content)
                 
+                # Track assistant response and inputs for history updates
+                new_state["last_assistant_response"] = last_message.content
+                new_state["last_inputs_used"] = new_state["inputs"].model_dump()
+                
+                # Add message to history manager
+                history_manager.add_message(
+                    session_id, 
+                    user_input, 
+                    last_message.content, 
+                    new_state["inputs"].model_dump()
+                )
+                
+                # Keep the old conversation history system for backward compatibility
                 conversation_history = state.get("conversation_history", [])
                 conversation_history.append({
                     "user_input": user_input,

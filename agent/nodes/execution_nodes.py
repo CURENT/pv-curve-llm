@@ -194,6 +194,8 @@ def compound_summary_agent(state: State):
         step_info = plan.steps[i] if plan and i < len(plan.steps) else None
         action_name = step_info.action if step_info else result.get("action", "unknown")
         result_text = result['result'][:100] + "..." if len(result['result']) > 100 else result['result']
+        # Remove the 100 character truncation to show full results
+        # result_text = result['result']
         summary_parts.append(f"Step {i+1} ({action_name}): {result_text}")
     
     summary = "\n".join(summary_parts)

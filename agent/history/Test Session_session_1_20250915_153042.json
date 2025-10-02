@@ -1,0 +1,38 @@
+{
+  "session_id": "session_1_20250915_153042",
+  "session_name": "Test Session",
+  "created_at": "2025-09-15T15:30:42.741501",
+  "last_updated": "2025-09-15T15:30:42.742035",
+  "messages": [
+    {
+      "timestamp": "2025-09-15T15:30:42.741835",
+      "user_input": "Hello",
+      "assistant_response": "Hi there! How can I help you?",
+      "inputs_used": {}
+    },
+    {
+      "timestamp": "2025-09-15T15:30:42.742032",
+      "user_input": "What is a PV curve?",
+      "assistant_response": "A PV curve shows the relationship between power and voltage...",
+      "inputs_used": {}
+    }
+  ],
+  "conversation_history": [
+    {
+      "user_input": "Hello",
+      "assistant_response": "Hi there! How can I help you?",
+      "inputs_used": {}
+    },
+    {
+      "user_input": "What is a PV curve?",
+      "assistant_response": "A PV curve shows the relationship between power and voltage...",
+      "inputs_used": {}
+    }
+  ],
+  "cached_results": [],
+  "metadata": {
+    "total_messages": 2,
+    "total_conversations": 2,
+    "total_cached_results": 0
+  }
+}

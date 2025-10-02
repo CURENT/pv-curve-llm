@@ -10,6 +10,13 @@ from agent.nodes.execution_nodes import (
     error_handler_agent,
     compound_summary_agent
 )
+from agent.nodes.history_sensitive_node import (
+    history_sensitive_agent,
+    history_aware_parameter_agent,
+    history_aware_generation_agent,
+    history_aware_analysis_agent,
+    history_state_updater
+)
 
 def create_compound_workflow(llm, prompts, retriever, generate_pv_curve):
     graph_builder = StateGraph(State)
@@ -29,6 +36,19 @@ def create_compound_workflow(llm, prompts, retriever, generate_pv_curve):
     graph_builder.add_node("generation", lambda state: generation_agent(state, generate_pv_curve))
     graph_builder.add_node("analysis", lambda state: analysis_agent(state, llm, prompts, retriever))
     graph_builder.add_node("error_handler", lambda state: error_handler_agent(state, llm, prompts))
+    
+    # History-sensitive nodes
+    graph_builder.add_node("history_sensitive", lambda state: history_sensitive_agent(state, llm, prompts, retriever))
+    graph_builder.add_node("history_parameter", lambda state: history_aware_parameter_agent(state, llm, prompts))
+    graph_builder.add_node("history_generation", lambda state: history_aware_generation_agent(state, generate_pv_curve))
+    graph_builder.add_node("history_analysis", lambda state: history_aware_analysis_agent(state, llm, prompts, retriever))
+    graph_builder.add_node("history_updater", lambda state: history_state_updater(
+        state, 
+        state.get("last_user_input", ""), 
+        state.get("last_assistant_response", ""), 
+        state.get("last_inputs_used", {}), 
+        state.get("results")
+    ))
     
     # Start with compound classification
     graph_builder.add_edge(START, "compound_classifier")

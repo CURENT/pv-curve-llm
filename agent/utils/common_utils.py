@@ -45,7 +45,12 @@ def create_initial_state():
         "retry_count": 0,
         "failed_node": None,
         "conversation_history": [],
-        "cached_results": []
+        "cached_results": [],
+        # Enhanced history context fields
+        "parameter_evolution": [],
+        "simulation_trends": [],
+        "user_preferences": {},
+        "context_summary": ""
     }
 
 def validate_state(state) -> dict[str, bool]:

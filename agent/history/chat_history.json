@@ -1,0 +1,54 @@
+{
+  "sessions": [
+    {
+      "session_id": "session_1_20250922_101104",
+      "session_name": "PV_Curve_Session_openai",
+      "created_at": "2025-09-22T10:11:04.084632",
+      "last_updated": "2025-09-22T10:11:52.195230",
+      "messages": [
+        {
+          "timestamp": "2025-09-22T10:11:52.195209",
+          "user_input": "what is pv curve and set pf to 0.9",
+          "assistant_response": "A PV curve in power systems is a Power‐Voltage curve used in voltage stability studies. It is constructed by plotting the voltage magnitude at a critical bus (or area) against progressively increasing real power (load) levels. As the load increases, the curve typically shows a \"nose\" point, which marks the maximum loadability limit—the critical threshold where any additional load could trigger a sudden voltage drop or collapse. This tool helps operators and analysts assess how close the system is to voltage instability and plan corrective actions accordingly.",
+          "inputs_used": {
+            "grid": "ieee39",
+            "bus_id": 5,
+            "step_size": 0.01,
+            "max_scale": 3.0,
+            "power_factor": 0.95,
+            "voltage_limit": 0.4,
+            "capacitive": false,
+            "continuation": true
+          }
+        }
+      ],
+      "conversation_history": [
+        {
+          "user_input": "what is pv curve and set pf to 0.9",
+          "assistant_response": "A PV curve in power systems is a Power‐Voltage curve used in voltage stability studies. It is constructed by plotting the voltage magnitude at a critical bus (or area) against progressively increasing real power (load) levels. As the load increases, the curve typically shows a \"nose\" point, which marks the maximum loadability limit—the critical threshold where any additional load could trigger a sudden voltage drop or collapse. This tool helps operators and analysts assess how close the system is to voltage instability and plan corrective actions accordingly.",
+          "inputs_used": {
+            "grid": "ieee39",
+            "bus_id": 5,
+            "step_size": 0.01,
+            "max_scale": 3.0,
+            "power_factor": 0.95,
+            "voltage_limit": 0.4,
+            "capacitive": false,
+            "continuation": true
+          }
+        }
+      ],
+      "cached_results": [],
+      "metadata": {
+        "total_messages": 1,
+        "total_conversations": 1,
+        "total_cached_results": 0
+      }
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-09-22T10:11:04.084609",
+    "last_updated": "2025-09-22T10:11:52.195243",
+    "total_sessions": 1
+  }
+}

@@ -1,3 +1,6 @@
+# This prompt guides the LLM to classify a user's message into one of three high-level categories:
+# 'question', 'parameter' (for changing settings), or 'generation' (for running the simulation).
+# It uses descriptions and examples to ensure accurate routing of user intent.
 CLASSIFIER_SYSTEM = """
 Classify the user message into one of three categories based on their intent:
 
@@ -45,6 +48,9 @@ MESSAGE user Run PV curve with current settings
 MESSAGE assistant generation
 """
 
+# This string serves as a comprehensive knowledge base for the LLM about the simulation parameters.
+# It details each parameter's purpose, valid ranges, and effects on the simulation.
+# This context is injected into other prompts so the LLM can answer questions or handle errors accurately.
 PARAMETERS_CONTEXT = """
 **Available Simulation Parameters Context:**
 
@@ -89,6 +95,9 @@ Everything under the nose point is theoretical as the system has already collaps
 Setting the curve type to continous will add a dotted line under the nose point mirroring the top of the curve.
 """
 
+# This prompt configures the LLM for the RAG (Retrieval Augmented Generation) task.
+# It defines the agent's persona, its scope of expertise, and how it should use
+# the retrieved context (`{context}`) to answer general user questions.
 QUESTION_GENERAL_AGENT_SYSTEM = """
 You are an expert in Power Systems and Electrical Engineering, more specifically in Voltage Stability and the application of Power-Voltage PV Curves (Nose Curves).
 
@@ -105,10 +114,15 @@ Here is that relevant information: {context}
 That is your relevant information to work with, but if you don't understand the following question or prompt don't try to relate it to PV curves and ask the user to rephrase it or clarify it.
 """
 
+# This is the user-facing part of the RAG prompt. It injects the actual user question
+# (`{user_input}`) into the conversation history for the LLM.
 QUESTION_GENERAL_AGENT_USER = """
 Here is the question to answer, be sure to keep your answer concise and ensure accuracy: {user_input}
 """
 
+# This prompt is for a sub-classifier that runs after a message is identified as a 'question'.
+# It directs the LLM to further categorize the question as either general knowledge ('question_general')
+# or a specific query about a simulation parameter ('question_parameter').
 QUESTION_CLASSIFIER_SYSTEM = """
 Classify the user question into one of two categories:
 
@@ -144,6 +158,10 @@ MESSAGE assistant question_general
 Choose the category that best matches the user's question intent.
 """
 
+# This prompt instructs the LLM on how to parse a user's request to modify parameters.
+# It includes rules, parameter lists, and examples to guide the LLM in extracting
+# all requested changes and formatting them into a structured output. It also takes
+# the `{current_inputs}` as context.
 PARAMETER_AGENT_SYSTEM = """
 Extract ALL parameters to modify from the user's request and their new values. You can modify multiple parameters in a single command.
 
@@ -236,6 +254,9 @@ MESSAGE user Disable mirrored branch
 MESSAGE assistant [{{parameter: "continuation", value: false}}]
 """
 
+# This prompt sets up the LLM to act as an expert on the simulation parameters.
+# It is used when a user's question is classified as 'question_parameter'.
+# The LLM uses the provided context and examples to give clear explanations.
 QUESTION_PARAMETER_AGENT_SYSTEM = """
 You are an expert in PV curve analysis parameters. Explain parameter meanings, functionality, and relationships clearly and concisely.
 
@@ -280,6 +301,9 @@ MESSAGE user How does the step size affect the curve?
 MESSAGE assistant The step size affects the curve by changing the amount of load to increase at each simulation step. A larger step size will cause the curve to change more rapidly with less points, and vice versa.
 """
 
+# This prompt is for the error handling agent. It gives the LLM the role of an
+# error analyst and provides context on common error types and their solutions,
+# allowing it to generate helpful, user-friendly error messages.
 ERROR_HANDLER_SYSTEM = """
 You are an expert error analyst for PV curve simulation systems. Analyze errors and provide clear, helpful explanations and solutions.
 
@@ -313,6 +337,9 @@ You are an expert error analyst for PV curve simulation systems. Analyze errors 
 Focus on being helpful and educational, not just diagnostic.
 """
 
+# This is a highly detailed prompt for the analysis agent. It defines its expert persona
+# and provides a comprehensive guide on how to interpret the numerical results of a
+# P-V curve simulation, including how different parameters influence the outcome.
 # TODO: Add examples
 ANALYSIS_AGENT_SYSTEM = """
 You are an expert in Power Systems and Electrical Engineering specializing in Voltage Stability and PV Curve analysis.
@@ -377,6 +404,9 @@ Use the following relevant technical information to enhance your analysis, but d
 Be concise but thorough, using technical terminology appropriately while ensuring the explanation is educational. Reference specific numerical values from the simulation results, including step-by-step progression through the curve_points data to make your analysis concrete and actionable.
 """
 
+# The user-facing prompt for the analysis agent. It injects the `{results}` and
+# `{grid_system}` data, and provides a checklist of required analysis points
+# to ensure the LLM's response is comprehensive and detailed.
 ANALYSIS_AGENT_USER = """
 Analyze the PV curve simulation results and provide engineering insights about the power system's voltage stability characteristics. Focus on practical implications and what the results mean for system operation.
 
@@ -427,6 +457,9 @@ Please reference specific numerical values from the following simulation results
 Use the detailed curve_points data to explain not just the overall results, but how the system behaves step-by-step as load increases, while incorporating parameter effects that explain the observed curve shape and characteristics for a comprehensive voltage stability analysis.
 """
 
+# This prompt instructs a classifier to determine if a user message is a single request ('simple')
+# or contains multiple, sequential requests ('compound'). This is the first classification
+# step and determines if the planning agent is needed.
 COMPOUND_CLASSIFIER_SYSTEM = """
 Determine if the user's message contains multiple sequential actions or is a single action request.
 
@@ -450,6 +483,9 @@ Look for:
 Classify as "compound" if multiple sequential actions are requested, "simple" otherwise.
 """
 
+# This prompt is for the planning agent. If a message is classified as 'compound',
+# this prompt guides the LLM to break down the complex request into a sequence
+# of simple, executable steps (e.g., parameter change, then generation).
 PLANNER_SYSTEM = """
 Break down the user's compound request into sequential executable steps.
 
@@ -490,16 +526,25 @@ Step 2: generation - "Generate PV curve"
 Keep steps atomic and sequential. Extract parameter values in the EXACT required formats.
 """
 
+# The user-facing part of the planning prompt, which injects the `{user_input}`.
 PLANNER_USER = """
 Break down this request: {user_input}
 """
 
+# The user-facing part of the error handling prompt, which injects the specific
+# `{error_context}` for the LLM to analyze.
 ERROR_HANDLER_USER = """
 Please analyze this error and provide a helpful explanation:
 
 {error_context}
 """
 
+"""
+Returns a dictionary of prompts for the agentic workflow.
+This function organizes all the prompt strings defined in this file into a
+single, structured dictionary. This makes it easy for other parts of the
+application to access the specific prompt they need for a given task.
+"""
 def get_prompts():
     """
     Returns a dictionary of prompts for the agentic workflow.
