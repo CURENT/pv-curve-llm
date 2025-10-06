@@ -44,11 +44,63 @@
         "total_conversations": 1,
         "total_cached_results": 0
       }
+    },
+    {
+      "session_id": "session_2_20251005_224711",
+      "session_name": "PV_Curve_Session_openai",
+      "created_at": "2025-10-05T22:47:11.629924",
+      "last_updated": "2025-10-05T22:47:44.984656",
+      "messages": [
+        {
+          "timestamp": "2025-10-05T22:47:31.847426",
+          "user_input": "change pf to 0.9",
+          "assistant_response": "Updated power_factor to 0.9",
+          "inputs_used": {
+            "grid": "ieee39",
+            "bus_id": 5,
+            "step_size": 0.01,
+            "max_scale": 3.0,
+            "power_factor": 0.9,
+            "voltage_limit": 0.4,
+            "capacitive": false,
+            "continuation": true
+          }
+        }
+      ],
+      "conversation_history": [
+        {
+          "timestamp": "2025-10-05T22:47:31.846718",
+          "user_input": "",
+          "assistant_response": "",
+          "inputs_used": {}
+        },
+        {
+          "user_input": "change pf to 0.9",
+          "assistant_response": "Updated power_factor to 0.9",
+          "inputs_used": {
+            "grid": "ieee39",
+            "bus_id": 5,
+            "step_size": 0.01,
+            "max_scale": 3.0,
+            "power_factor": 0.9,
+            "voltage_limit": 0.4,
+            "capacitive": false,
+            "continuation": true
+          },
+          "timestamp": "2025-10-05T22:47:44.984631"
+        }
+      ],
+      "cached_results": [],
+      "metadata": {
+        "total_messages": 1,
+        "total_conversations": 2,
+        "total_cached_results": 0
+      }
     }
   ],
   "metadata": {
     "created_at": "2025-09-22T10:11:04.084609",
-    "last_updated": "2025-09-22T10:11:52.195243",
-    "total_sessions": 1
+    "last_updated": "2025-10-05T22:47:44.984665",
+    "total_sessions": 2
   }
 }

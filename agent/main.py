@@ -12,7 +12,6 @@ from agent.history.history import ChatHistoryManager
 from agent.models.state_models import Inputs
 from agent.utils.common_utils import format_inputs_display, create_initial_state
 from agent.workflows.compound_workflow import create_compound_workflow
-from agent.workflows.history_aware_workflow import create_history_aware_workflow
 from agent.terminal_ui import divider, info, answer
 
 load_dotenv()
@@ -42,10 +41,7 @@ def setup_dependencies(provider="ollama"):
 
 def create_graph(provider="ollama", use_history=True):
     llm, prompts, retriever = setup_dependencies(provider)
-    if use_history:
-        return create_history_aware_workflow(llm, prompts, retriever, generate_pv_curve)
-    else:
-        return create_compound_workflow(llm, prompts, retriever, generate_pv_curve)
+    return create_compound_workflow(llm, prompts, retriever, generate_pv_curve, use_history)
 
 
 def run_agent():

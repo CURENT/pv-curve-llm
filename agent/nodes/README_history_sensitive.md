@@ -64,8 +64,8 @@ class State(TypedDict):
 
 ### 4. Workflow Integration
 
-The `history_aware_workflow.py` provides:
-- `create_history_aware_workflow()`: Main history-aware workflow
+The `compound_workflow.py` now provides:
+- `create_compound_workflow()`: Unified workflow with optional history-aware features
 - `create_hybrid_workflow()`: Hybrid workflow that can switch between modes
 
 ## Usage
@@ -73,10 +73,10 @@ The `history_aware_workflow.py` provides:
 ### Basic Usage
 
 ```python
-from agent.workflows.history_aware_workflow import create_history_aware_workflow
+from agent.workflows.compound_workflow import create_compound_workflow
 
-# Create history-aware workflow
-graph = create_history_aware_workflow(llm, prompts, retriever, generate_pv_curve)
+# Create unified workflow with history-aware features
+graph = create_compound_workflow(llm, prompts, retriever, generate_pv_curve, use_history=True)
 
 # Use in main agent loop
 state = create_initial_state()
@@ -86,10 +86,10 @@ new_state = graph.invoke(state, config={"recursion_limit": 50})
 ### Hybrid Mode
 
 ```python
-from agent.workflows.history_aware_workflow import create_hybrid_workflow
+from agent.workflows.compound_workflow import create_compound_workflow
 
-# Create hybrid workflow (can switch between history-aware and regular modes)
-graph = create_hybrid_workflow(llm, prompts, retriever, generate_pv_curve, use_history=True)
+# Create unified workflow (can switch between history-aware and regular modes)
+graph = create_compound_workflow(llm, prompts, retriever, generate_pv_curve, use_history=True)
 ```
 
 ## Key Features
