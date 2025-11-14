@@ -17,5 +17,3 @@ yaspin
 sentence-transformers
 torch
 huggingface-hub
-flask
-flask-cors
