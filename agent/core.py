@@ -23,7 +23,7 @@ def setup_dependencies(provider="ollama"):
     else:
         llm = ChatOllama(
             model=os.getenv("OLLAMA_MODEL") or "pv-curve" or "llama3.1:8b",
-            base_url="http://localhost:11434"
+            base_url=os.getenv("OLLAMA_HOST") or "http://localhost:11434"
         )
         llm._model_name = llm.model
 
