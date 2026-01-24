@@ -14,6 +14,7 @@ def generate_pv_curve(
     power_factor=0.95,         # Assumed constant power factor (relationship between real and reactive power)
     voltage_limit=0.4,         # Minimum acceptable voltage limit (in pu) before we stop
     capacitive=False,         # Whether the power factor is capacitive or inductive (default is inductive)
+    skip_plot=False,          # Skip visual graph generation (for analysis-only mode)
 ):
     net_map = {
         "ieee14": pn.case14,
@@ -84,7 +85,8 @@ def generate_pv_curve(
 
         except pp.LoadflowNotConverged:
             # If the solver can't find a valid solution, we have reached the collapse point
-            print("P-V Curve Generated - Voltage collapse point successfully identified.")
+            if not skip_plot:
+                print("Voltage collapse point successfully identified.")
             converged = False
             break
 
@@ -99,41 +101,44 @@ def generate_pv_curve(
     nose_p = P_vals[max_p_idx]
     nose_v = V_vals[max_p_idx]
     
-    
-
-    # Create the plot
-    plt.figure(figsize=(8, 6))
-    # Upper branch (stable) from power-increase sweep
-    plt.plot(P_vals, V_vals, marker="o", linestyle="-", color="blue", label="Upper Branch")
-    plt.scatter(nose_p, nose_v, color="red", zorder=5, label="Nose Point")
-    plt.annotate(
-        f"P={nose_p:.1f} MW\nV={nose_v:.3f} pu",
-        xy=(nose_p, nose_v),
-        xytext=(nose_p * 0.9, nose_v + 0.05),
-        arrowprops=dict(arrowstyle="->", color="black"),
-        fontsize=9
-    )
-    plt.xlabel("Total Active Load P (MW)")
-    plt.ylabel(f"Voltage at Bus {target_bus_idx} (pu)")
-    plt.title("System P–V Curve (Voltage Stability Analysis)")
-    
-    # Set y-axis ticks every 0.05 for more precision
-    y_min_candidates = [min(V_vals)]
-    y_max_candidates = [max(V_vals)]
-    y_min = max(0, min(y_min_candidates) - 0.05)
-    y_max = max(y_max_candidates) + 0.05
-    y_ticks = np.arange(np.floor(y_min * 20) / 20, np.ceil(y_max * 20) / 20 + 0.05, 0.05)
-    plt.yticks(y_ticks)
-    
-    plt.grid(True)
-    plt.legend()
-    plt.savefig(save_path, dpi=300, bbox_inches="tight")
-    
-    print(f"P-V curve successfully generated and saved at: {save_path}")
-    print("Displaying curve preview - close the plot window to continue analysis...")
-    
-    plt.show()
-    plt.close()
+    # Only create plot if skip_plot is False
+    if not skip_plot:
+        # Create the plot
+        plt.figure(figsize=(8, 6))
+        # Upper branch (stable) from power-increase sweep
+        plt.plot(P_vals, V_vals, marker="o", linestyle="-", color="blue", label="Upper Branch")
+        plt.scatter(nose_p, nose_v, color="red", zorder=5, label="Nose Point")
+        plt.annotate(
+            f"P={nose_p:.1f} MW\nV={nose_v:.3f} pu",
+            xy=(nose_p, nose_v),
+            xytext=(nose_p * 0.9, nose_v + 0.05),
+            arrowprops=dict(arrowstyle="->", color="black"),
+            fontsize=9
+        )
+        plt.xlabel("Total Active Load P (MW)")
+        plt.ylabel(f"Voltage at Bus {target_bus_idx} (pu)")
+        plt.title("System P–V Curve (Voltage Stability Analysis)")
+        
+        # Set y-axis ticks every 0.05 for more precision
+        y_min_candidates = [min(V_vals)]
+        y_max_candidates = [max(V_vals)]
+        y_min = max(0, min(y_min_candidates) - 0.05)
+        y_max = max(y_max_candidates) + 0.05
+        y_ticks = np.arange(np.floor(y_min * 20) / 20, np.ceil(y_max * 20) / 20 + 0.05, 0.05)
+        plt.yticks(y_ticks)
+        
+        plt.grid(True)
+        plt.legend()
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        
+        print(f"P-V curve successfully generated and saved at: {save_path}")
+        print("Displaying curve preview - close the plot window to continue analysis...")
+        
+        plt.show()
+        plt.close()
+    else:
+        # When skipping plot, set save_path to None
+        save_path = None
 
     # Add points and details of shape for the LLM to better understand the curve
     curve_points = []

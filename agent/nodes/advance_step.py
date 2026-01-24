@@ -1,6 +1,10 @@
 from agent.state.app_state import State
+from agent.utils.display import display_executing_node
 
 def advance_step(state: State):
+    
+    display_executing_node("advance_step")
+
     current_step = state.get("current_step", 0)
     plan = state.get("plan")
     step_results = state.get("step_results", [])

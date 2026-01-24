@@ -1,12 +1,46 @@
 from langchain_core.messages import AIMessage
 from agent.state.app_state import State
 from agent.schemas.response import NodeResponse
-from agent.utils.context import get_conversation_context
+from agent.schemas.parameter import InputModifier
+from agent.utils.display import display_executing_node, console
 from datetime import datetime
 
 def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
-    inputs = state["inputs"]
     
+    display_executing_node("generation")
+    
+    inputs = state["inputs"]
+    last_message = state["messages"][-1]
+    
+    # Extract parameters from user's message if they're present
+    # This allows "generate pv curve that power factor is 0.9" to work
+    modifier_llm = llm.with_structured_output(InputModifier)
+    result = modifier_llm.invoke([
+        {"role": "system", "content": prompts["parameter_agent"]["system"].format(current_inputs=inputs)},
+        {"role": "user", "content": last_message.content}
+    ])
+    
+    # Update inputs if parameters were found in the message
+    if result.modifications:
+        updates = {}
+        for modification in result.modifications:
+            converted_value = modification.value
+            if modification.parameter in ["bus_id"]:
+                converted_value = int(modification.value)
+            elif modification.parameter in ["step_size", "max_scale", "power_factor", "voltage_limit"]:
+                converted_value = float(modification.value)
+            elif modification.parameter in ["capacitive", "continuation"]:
+                if isinstance(modification.value, str):
+                    converted_value = modification.value.lower() in ["true", "yes", "1", "on"]
+                else:
+                    converted_value = bool(modification.value)
+            
+            updates[modification.parameter] = converted_value
+        
+        # Update inputs with extracted parameters
+        inputs = inputs.model_copy(update=updates)
+    
+    # Generate PV curve with plot (skip_plot=False by default)
     results = generate_pv_curve(
         grid=inputs.grid,
         target_bus_idx=inputs.bus_id,
@@ -15,6 +49,7 @@ def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
         power_factor=inputs.power_factor,
         voltage_limit=inputs.voltage_limit,
         capacitive=inputs.capacitive,
+        skip_plot=False,  # Generate the visual graph
     )
     
     load_type = "capacitive" if inputs.capacitive else "inductive"
@@ -25,45 +60,8 @@ def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
         f"Plot saved to {results['save_path']}"
     )
     
-    analysis_query = (
-        f"PV curve voltage stability analysis nose point load margin "
-        f"voltage drop {inputs.grid} power system stability assessment "
-        f"power factor {inputs.power_factor} voltage collapse"
-    )
-    
-    context = retriever.invoke(analysis_query)
-    
-    recent_exchanges = get_conversation_context(state, max_exchanges=3)
-    comparison_context = ""
-    
-    if recent_exchanges:
-        comparison_context = "\n\n**Previous Analysis Results for Comparison:**\n"
-        
-        for i, exchange in enumerate(recent_exchanges, 1):
-            if exchange.get('results'):
-                prev_results = exchange['results']
-                prev_inputs = exchange.get('inputs_state', {})
-                comparison_context += f"\n**Previous Analysis {i}:**\n"
-                comparison_context += f"- Grid: {prev_results.get('grid_system', 'N/A')}\n"
-                comparison_context += f"- Bus: {prev_results.get('bus_monitored', 'N/A')}\n"
-                comparison_context += f"- Load Margin: {prev_results.get('load_margin_mw', 'N/A')} MW\n"
-                comparison_context += f"- Nose Point Voltage: {prev_results.get('nose_point_voltage_pu', 'N/A')} pu\n"
-                comparison_context += f"- Power Factor: {prev_inputs.get('power_factor', 'N/A')}\n"
-                comparison_context += f"- Load Type: {'Capacitive' if prev_inputs.get('capacitive', False) else 'Inductive'}\n"
-                comparison_context += f"- Converged Steps: {prev_results.get('convergence_steps', 'N/A')}\n"
-    
-    system_prompt = prompts["analysis_agent"]["system"].format(context=context) + comparison_context
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": prompts["analysis_agent"]["user"].format(
-            results=results,
-            grid_system=results['grid_system'].upper()
-        )}
-    ]
-    analysis_reply = llm.invoke(messages)
-    
-    combined_content = f"{generation_content}\n\n{analysis_reply.content}"
-    reply = AIMessage(content=combined_content)
+    # No analysis here - just generation
+    reply = AIMessage(content=generation_content)
     
     node_response = NodeResponse(
         node_type="generation",
@@ -74,16 +72,17 @@ def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
             "bus_monitored": inputs.bus_id,
             "load_margin_mw": results.get("load_margin_mw"),
             "nose_point_voltage_pu": results.get("nose_point", {}).get("voltage_pu"),
-            "analysis": analysis_reply.content,
-            "comparison_context_used": bool(comparison_context),
-            "exchanges_included": len(recent_exchanges)
         },
-        message=combined_content,
+        message=generation_content,
         timestamp=datetime.now(),
         metadata={
             "plot_path": results["save_path"],
             "convergence_steps": results["converged_steps"]
         }
     )
-    return {"messages": [reply], "results": results, "node_response": node_response}
+    # Return updated inputs if they were modified
+    return_value = {"messages": [reply], "results": results, "node_response": node_response}
+    if result.modifications:
+        return_value["inputs"] = inputs
+    return return_value
 

@@ -17,7 +17,7 @@ class StepParameters(BaseModel):
 class StepType(BaseModel):
     model_config = ConfigDict(extra="forbid")
     
-    action: Literal["question", "parameter", "generation"] = Field(..., description="The type of action to perform")
+    action: Literal["question", "parameter", "generation", "analysis"] = Field(..., description="The type of action to perform")
     content: str = Field(..., description="The specific content for this step")
     parameters: Optional[StepParameters] = Field(None, description="Parameters for this step if it's a parameter modification")
 

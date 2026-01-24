@@ -1,8 +1,12 @@
 from agent.state.app_state import State
 from agent.schemas.response import NodeResponse
 from datetime import datetime
+from agent.utils.display import display_executing_node
 
 def router(state: State):
+    
+    display_executing_node("router")
+    
     message_type = state.get("message_type", "question_general")
     last_message = state["messages"][-1] if state.get("messages") else None
     user_input = last_message.content.lower() if last_message and hasattr(last_message, 'content') else ""
@@ -27,6 +31,9 @@ def router(state: State):
         is_compound = False
     elif message_type == "generation":
         next_node = "generation"
+        is_compound = False
+    elif message_type == "analysis":
+        next_node = "analysis"
         is_compound = False
     else:
         next_node = "question_general"

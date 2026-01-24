@@ -2,8 +2,12 @@ from agent.state.app_state import State
 from agent.schemas.response import NodeResponse
 from agent.utils.context import get_conversation_context
 from datetime import datetime
+from agent.utils.display import display_executing_node
 
 def question_parameter_agent(state: State, llm, prompts):
+    
+    display_executing_node("question_parameter")
+    
     last_message = state["messages"][-1]
     
     recent_exchanges = get_conversation_context(state, max_exchanges=3)

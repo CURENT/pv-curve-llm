@@ -6,3 +6,4 @@ venv
 __pycache__
 /history/*
 .claude
+/agent/vector_db/*

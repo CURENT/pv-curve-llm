@@ -2,8 +2,12 @@ from langchain_core.messages import AIMessage
 from agent.state.app_state import State
 from agent.schemas.response import NodeResponse
 from datetime import datetime
+from agent.utils.display import display_executing_node
 
 def error_handler_agent(state: State, llm, prompts):
+    
+    display_executing_node("error_handler")
+
     error_info = state.get("error_info", {})
     retry_count = state.get("retry_count", 0)
     failed_node = state.get("failed_node")

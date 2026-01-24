@@ -3,8 +3,12 @@ from agent.state.app_state import State
 from agent.schemas.parameter import InputModifier
 from agent.schemas.response import NodeResponse
 from datetime import datetime
+from agent.utils.display import display_executing_node
 
 def parameter_agent(state: State, llm, prompts):
+    
+    display_executing_node("parameter")
+    
     last_message = state["messages"][-1]
     modifier_llm = llm.with_structured_output(InputModifier)
     current_inputs = state["inputs"]

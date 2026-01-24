@@ -2,8 +2,12 @@ from langchain_core.messages import AIMessage
 from agent.state.app_state import State
 from agent.schemas.response import NodeResponse
 from datetime import datetime
+from agent.utils.display import display_executing_node
 
 def summary_agent(state: State):
+    
+    display_executing_node("summary")
+    
     plan = state.get("plan")
     step_results = state.get("step_results", [])
 

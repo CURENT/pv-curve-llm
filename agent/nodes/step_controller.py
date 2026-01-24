@@ -2,8 +2,12 @@ from langchain_core.messages import AIMessage, HumanMessage
 from agent.state.app_state import State
 from agent.schemas.response import NodeResponse
 from datetime import datetime
+from agent.utils.display import display_executing_node
 
 def step_controller(state: State):
+    
+    display_executing_node("step_controller")
+    
     plan = state.get("plan")
     current_step = state.get("current_step", 0)
     

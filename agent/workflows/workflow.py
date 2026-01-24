@@ -6,6 +6,7 @@ from agent.nodes.question_general import question_general_agent
 from agent.nodes.question_parameter import question_parameter_agent
 from agent.nodes.parameter import parameter_agent
 from agent.nodes.generation import generation_agent
+from agent.nodes.analysis import analysis_agent
 from agent.nodes.planner import planner_agent
 from agent.nodes.step_controller import step_controller
 from agent.nodes.advance_step import advance_step
@@ -25,6 +26,7 @@ def create_workflow(llm, prompts, retriever, generate_pv_curve):
     graph_builder.add_node("question_parameter", lambda state: question_parameter_agent(state, llm, prompts))
     graph_builder.add_node("parameter", lambda state: parameter_agent(state, llm, prompts))
     graph_builder.add_node("generation", lambda state: generation_agent(state, llm, prompts, retriever, generate_pv_curve))
+    graph_builder.add_node("analysis", lambda state: analysis_agent(state, llm, prompts, retriever, generate_pv_curve))
     graph_builder.add_node("error_handler", lambda state: error_handler_agent(state, llm, prompts))
     
     graph_builder.add_edge(START, "classifier")
@@ -38,6 +40,7 @@ def create_workflow(llm, prompts, retriever, generate_pv_curve):
             "question_parameter": "question_parameter",
             "parameter": "parameter",
             "generation": "generation",
+            "analysis": "analysis",
             "planner": "planner"
         }
     )
@@ -52,6 +55,7 @@ def create_workflow(llm, prompts, retriever, generate_pv_curve):
             "question_parameter": "question_parameter",
             "parameter": "parameter",
             "generation": "generation",
+            "analysis": "analysis",
             "advance_step": "advance_step",
             "error_handler": "error_handler",
             "summary": "summary"
@@ -87,6 +91,16 @@ def create_workflow(llm, prompts, retriever, generate_pv_curve):
     )
     
     graph_builder.add_conditional_edges(
+        "analysis",
+        lambda state: "error_handler" if state.get("error_info") else ("advance_step" if state.get("is_compound") else "END"),
+        {
+            "error_handler": "error_handler",
+            "advance_step": "advance_step",
+            "END": END
+        }
+    )
+    
+    graph_builder.add_conditional_edges(
         "parameter",
         lambda state: "error_handler" if state.get("error_info") else ("advance_step" if state.get("is_compound") else "END"),
         {
@@ -106,7 +120,8 @@ def create_workflow(llm, prompts, retriever, generate_pv_curve):
         route_after_error,
         {
             "parameter": "parameter",
-            "generation": "generation", 
+            "generation": "generation",
+            "analysis": "analysis",
             "advance_step": "advance_step",
             "END": END
         }

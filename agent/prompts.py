@@ -1,13 +1,15 @@
 CLASSIFIER_SYSTEM = """
-Classify the user message into one of four categories based on their intent:
+Classify the user message into one of five categories based on their intent:
 
-- **question_general**: General questions about voltage stability, PV curves, power systems, or educational information. Examples: "What is a nose point?", "How does voltage stability work?", "Explain load margin", "What causes voltage collapse?"
+- **question_general**: General questions about voltage stability, PV curves, power systems, educational information, or requests to compare previous results. Examples: "What is a nose point?", "How does voltage stability work?", "Explain load margin", "What causes voltage collapse?", "Compare the previous two results", "Compare results from bus 5 and bus 10"
 
 - **question_parameter**: Questions specifically about parameter meanings, functionality, or valid ranges. Examples: "What does power factor mean?", "How does step size work?", "What load buses are available?", "What's the difference between capacitive and inductive?"
 
 - **parameter**: A request to modify system parameters or settings. Examples: "Set grid to ieee118", "Change power factor to 0.9", "Use capacitive load", "Increase voltage limit". This should look as if a command is being given.
 
-- **generation**: A request to generate, run, create, or execute a PV curve analysis with current or specified parameters. Examples: "Run PV curve analysis", "Generate the curve", "Create a simulation", "Execute analysis", "Start the calculation"
+- **generation**: A request to generate, create, or plot a PV curve visual graph. Examples: "Generate PV curve", "Create the curve", "Plot the graph", "Show me the PV curve", "Generate the visualization"
+
+- **analysis**: A request to analyze PV curve results, get insights, or understand what the results mean (without generating a new visual graph). Examples: "Analyze the results", "What do these results mean?", "Explain the voltage stability", "Analyze the curve", "What insights can you provide?", "Interpret the data"
 
 Choose the category that best matches the user's primary intent.
 
@@ -34,12 +36,14 @@ MESSAGE user Make the load capacitive
 MESSAGE assistant parameter
 MESSAGE user What is a nose point?
 MESSAGE assistant question_general
-MESSAGE user Create the PV curve analysis
+MESSAGE user Create the PV curve
 MESSAGE assistant generation
 MESSAGE user Set voltage limit to 0.5 and power factor to 0.9
 MESSAGE assistant parameter
-MESSAGE user Execute the analysis
-MESSAGE assistant generation
+MESSAGE user Analyze the results
+MESSAGE assistant analysis
+MESSAGE user What do these results mean?
+MESSAGE assistant analysis
 MESSAGE user What's the difference between inductive and capacitive loads?
 MESSAGE assistant question_parameter
 MESSAGE user Run PV curve with current settings
@@ -48,6 +52,20 @@ MESSAGE user What load buses are available for ieee39?
 MESSAGE assistant question_parameter
 MESSAGE user How does step size affect the curve?
 MESSAGE assistant question_parameter
+MESSAGE user Compare the previous two results
+MESSAGE assistant question_general
+MESSAGE user Compare two results
+MESSAGE assistant question_general
+MESSAGE user Compare previous results
+MESSAGE assistant question_general
+MESSAGE user Compare results from bus 5 and bus 10
+MESSAGE assistant question_general
+MESSAGE user Show me a comparison of the last two PV curves
+MESSAGE assistant question_general
+MESSAGE user Compare the PV curves I generated
+MESSAGE assistant question_general
+MESSAGE user What's the difference between the last two analyses?
+MESSAGE assistant question_general
 """
 
 PARAMETERS_CONTEXT = """
@@ -100,6 +118,8 @@ You are an expert in Power Systems and Electrical Engineering, more specifically
 CRITICAL: When a user references P-V Curves or PV curves, it is ALWAYS Power-Voltage curves for voltage stability analysis, NOT photovoltaic, Pressure-Volume, or anything else. Always respond about Power-Voltage curves for electrical power systems.
 
 Your job is to educate the user on the topic of PV Curves and voltage stability BASED ON THEIR PROMPT OR QUESTION, so if asked about who you are and what you do, be able to explain it. If a question is not related to PV Curves or voltage stability, you should politely decline to answer and say that you are an expert in PV Curves and voltage stability, then give an example of a question they could ask you.
+
+IMPORTANT: If the user asks to compare previous results or analyses, use the conversation context provided below to compare the different PV curve analyses. Compare key metrics like load margin, nose point voltage, power factor, bus locations, and explain the differences and their implications for voltage stability.
 
 Here is some relevant information about PV Curves and voltage stability, use this information and reference it in your answer, but do not mention the documents or the exact location in the documents it is from. Do not reference any figures (i.e. Figure 1.1, etc.) or references to places such as (Equation 1.4, etc.) in your answer, and if documents reference other parts of documents, that is for your understanding and only your deductions should be included in your answer. Again, the user should have no idea where the information is from or that you are pulling information from somewhere, it should just know the answer as if you are the expert explaining it.
 
@@ -205,6 +225,30 @@ MESSAGE user Upper branch only
 MESSAGE assistant [{{parameter: "continuation", value: false}}]
 MESSAGE user Disable mirrored branch
 MESSAGE assistant [{{parameter: "continuation", value: false}}]
+MESSAGE user Generate PV curve with power factor 0.9
+MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}]
+MESSAGE user Generate pv curve that power factor is 0.9
+MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}]
+MESSAGE user Create a PV curve for ieee118 with bus 10
+MESSAGE assistant [{{parameter: "grid", value: "ieee118"}}, {{parameter: "bus_id", value: 10}}]
+MESSAGE user Run simulation with power factor 0.85 and capacitive load
+MESSAGE assistant [{{parameter: "power_factor", value: 0.85}}, {{parameter: "capacitive", value: true}}]
+MESSAGE user Generate curve using ieee39 system and power factor 0.92
+MESSAGE assistant [{{parameter: "grid", value: "ieee39"}}, {{parameter: "power_factor", value: 0.92}}]
+MESSAGE user Create curve that power factor is 0.9 and bus is 10
+MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}, {{parameter: "bus_id", value: 10}}]
+MESSAGE user Generate curve that uses power factor 0.9 that has bus 10
+MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}, {{parameter: "bus_id", value: 10}}]
+MESSAGE user Change parameter that power factor is 0.9
+MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}]
+MESSAGE user Change the parameter that pf is 0.9
+MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}]
+MESSAGE user Generate curve that shows power factor of 0.9
+MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}]
+MESSAGE user Generate curve that uses ieee118 that has bus 10
+MESSAGE assistant [{{parameter: "grid", value: "ieee118"}}, {{parameter: "bus_id", value: 10}}]
+MESSAGE user Generate PV curve that power factor is 0.9 that uses capacitive load
+MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}, {{parameter: "capacitive", value: true}}]
 """
 
 QUESTION_PARAMETER_AGENT_SYSTEM = """
@@ -406,7 +450,8 @@ Break down the user's compound request into sequential executable steps.
 Each step should be one of:
 - "question": Educational or informational requests
 - "parameter": Parameter modification with specific values
-- "generation": PV curve generation/analysis
+- "generation": PV curve visual graph generation (creates plot)
+- "analysis": PV curve results analysis (analyzes data without creating plot)
 
 For parameter steps, extract the specific parameter values into the parameters field using EXACT formats:
 
@@ -432,10 +477,11 @@ For parameter steps, extract the specific parameter values into the parameters f
 - "power factor 0.95" → power_factor: 0.95
 
 **Example breakdown:**
-"Use 39 bus system with capacitive load and power factor 0.96, then generate curve"
+"Use 39 bus system with capacitive load and power factor 0.96, then generate curve and analyze it"
 
 Step 1: parameter - "Set grid to ieee39, load type to capacitive, and power factor to 0.96" with parameters: {"grid": "ieee39", "capacitive": true, "power_factor": 0.96}
 Step 2: generation - "Generate PV curve"
+Step 3: analysis - "Analyze the results"
 
 Keep steps atomic and sequential. Extract parameter values in the EXACT required formats.
 """
