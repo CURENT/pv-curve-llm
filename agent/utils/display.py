@@ -2,8 +2,9 @@ from rich.console import Console
 from rich.table import Table
 from rich.markdown import Markdown
 from rich.panel import Panel
+import sys
 
-console = Console()
+console = Console(file=sys.stderr)
 
 # Node name to display name mapping
 NODE_DISPLAY_NAMES = {
