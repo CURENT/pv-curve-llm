@@ -17,3 +17,5 @@ yaspin
 sentence-transformers
 torch
 huggingface-hub
+fastmcp
+pytest

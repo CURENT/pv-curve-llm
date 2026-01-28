@@ -1,10 +1,14 @@
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 import os
+from pathlib import Path
 from agent.utils.reranker import get_reranker
 
-# Path to the vector database
-DB_LOCATION = "agent/vector_db"
+# Get the project root directory (where this file is located)
+PROJECT_ROOT = Path(__file__).parent.parent
+
+# Path to the vector database (absolute path)
+DB_LOCATION = str(PROJECT_ROOT / "agent" / "vector_db")
 
 # Embedding model
 EMBEDDING_MODEL = "mxbai-embed-large"

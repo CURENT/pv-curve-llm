@@ -15,10 +15,12 @@ def router(state: State):
     comparison_patterns = ["compare", "versus", "vs", "both", "different", "multiple"]
     
     is_multi_step = any(keyword in user_input for keyword in multi_step_keywords)
-    is_comparison = any(pattern in user_input for pattern in comparison_patterns)
-    has_multiple_actions = user_input.count("set ") > 1 or user_input.count("change ") > 1 or user_input.count("generate") > 0 and ("set" in user_input or "change" in user_input)
-    
-    needs_planning = is_multi_step or (is_comparison and has_multiple_actions)
+    has_multiple_actions = (
+        user_input.count("set ") > 1
+        or user_input.count("change ") > 1
+        or (user_input.count("generate") > 0 and ("set" in user_input or "change" in user_input))
+    )    
+    needs_planning = is_multi_step or has_multiple_actions
     
     if needs_planning:
         next_node = "planner"
