@@ -17,6 +17,7 @@
 - [Architecture](#architecture)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [MCP Server (Claude Desktop)](#mcp-server-claude-desktop)
 - [Usage Examples](#usage-examples)
 - [LangGraph Workflow](#langgraph-workflow)
 - [Node Reference](#node-reference)
@@ -77,10 +78,11 @@ This project is part of the **CURENT Large-scale Testbed (LTB)** research initia
 - **Adaptive Routing**: Conditional workflow paths based on query complexity and state
 
 ### 🎯 Flexible Deployment
-
+ 
 - **Multiple LLM Providers**: Choose between OpenAI API (recommended) or Ollama local models
 - **Session Management**: Persistent conversation storage with JSON-based history
 - **Extensible Architecture**: Modular design enables easy addition of new capabilities
+- **Claude Desktop MCP (optional)**: Run the agent as an MCP server inside Claude Desktop (see `agent/mcp_server/README.md`).
 
 ## Architecture
 
@@ -169,7 +171,7 @@ cd pv-curve-llm
 2. **Create virtual environment**
 
 ```bash
-python -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
@@ -259,6 +261,12 @@ Compare ieee14 bus 5 with ieee118 bus 10
 ```
 
 Type `quit` or `q` to exit and save your session.
+
+## MCP Server (Claude Desktop)
+
+If you want to use the PV Curve Agent as an MCP server inside **Claude Desktop** (tools like `classify_message`, `route_request`, `generate_pv_curve`, etc.), follow the dedicated guide in:
+
+- `agent/mcp_server/README.md`
 
 ## Usage Examples
 
@@ -860,6 +868,12 @@ pv-curve-llm/
 │   ├── output/                    # Processing output files
 │   ├── generated/                 # Agent-generated PV curve plots
 │   │
+│   ├── mcp_server/                # MCP server integration for Claude Desktop
+│   │   ├── server.py             # FastMCP server and tool registration
+│   │   ├── tools.py              # Thin wrappers around agent nodes
+│   │   ├── state_manager.py      # Session state handling for MCP
+│   │   └── README.md             # MCP/Claude setup guide
+│   │
 │   ├── vector.py                  # Retriever interface
 │   ├── train.py                   # Vector DB training script
 │   ├── session.py                 # Session management
@@ -879,6 +893,7 @@ pv-curve-llm/
 │
 ├── main.py                        # Application entry point
 ├── cli.py                         # Command-line interface
+├── mcp_server.py                  # Top-level entry point for MCP server
 ├── requirements.txt               # Python dependencies
 ├── README.md                      # Main documentation
 ├── LICENSE                        # MIT License
