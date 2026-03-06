@@ -19,3 +19,4 @@ torch
 huggingface-hub
 fastmcp
 pytest
+coverage==7.6.1
