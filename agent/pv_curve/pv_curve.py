@@ -16,7 +16,7 @@ def generate_pv_curve(
     voltage_limit=0.4,         # Minimum acceptable voltage limit (in pu) before we stop
     capacitive=False,         # Whether the power factor is capacitive or inductive (default is inductive)
     skip_plot=False,          # Skip visual graph generation (for analysis-only mode)
-    contingency_lines=None,    # It should be [1, 2] means cut the line between bus 1 and 2 instead of 2 and 3(It starts from 0 in pp)
+    contingency_lines=None,    # List of (from_bus, to_bus) pairs, 1-based; e.g. [(1, 2)] or [(2, 3), (3, 4)]. Lines/transformers between those buses are taken out of service.
     gen_voltage_setpoints=None,  # Dict of {gen_index: vm_pu} to override generator voltage setpoints before the sweep
                                  # e.g. {1: 1.05} — set generator 1 to 1.05 pu
 ):

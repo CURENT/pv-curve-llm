@@ -1,4 +1,22 @@
+from typing import List, Optional, Tuple
+
 from agent.schemas.inputs import Inputs
+
+
+def apply_contingency_lines_update(
+    current_lines: Optional[List[Tuple[int, int]]],
+    new_value: Optional[List[Tuple[int, int]]],
+) -> Optional[List[Tuple[int, int]]]:
+    """Apply contingency_lines update: clear, replace (restore one), or merge (add outage)."""
+    if new_value is None or new_value == []:
+        return None
+    current = current_lines or []
+    current_set = {tuple(p) for p in current}
+    new_set = {tuple(p) for p in new_value}
+    if current_set and new_set and new_set <= current_set:
+        return sorted(new_set)
+    return sorted(current_set | new_set)
+
 
 def format_inputs_display(inputs: Inputs) -> str:
     param_labels = {

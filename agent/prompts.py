@@ -154,6 +154,8 @@ Available Parameters:
 - voltage_limit: Minimum voltage threshold (0.0-1.0)
 - capacitive: Load type - true=capacitive load, false=inductive load (default: false for inductive)
 - continuation: Curve display - true=show continuous/mirrored curve, false=upper branch only (default: true for continuous)
+- contingency_lines: Outages as "from_bus-to_bus" pairs; "1-2" or "1-2;3-4". If user asks to restore/connect back ONE specific line, set to the REMAINING lines still out (remove that pair from current list). Use "" or "none" only when user wants ALL lines restored.
+- gen_voltage_setpoints: Generator voltage setpoints as string "gen_index:vm_pu"; e.g. "1:1.05" for generator 1 at 1.05 pu, "1:1.05,2:1.02" for multiple. Use "" or "none" to clear. Voltages must stay between the current voltage_limit and 1.2 pu.
 
 Rules:
 1. Extract ALL parameters the user requests to change in one response
@@ -249,6 +251,26 @@ MESSAGE user Generate curve that uses ieee118 that has bus 10
 MESSAGE assistant [{{parameter: "grid", value: "ieee118"}}, {{parameter: "bus_id", value: 10}}]
 MESSAGE user Generate PV curve that power factor is 0.9 that uses capacitive load
 MESSAGE assistant [{{parameter: "power_factor", value: 0.9}}, {{parameter: "capacitive", value: true}}]
+MESSAGE user Cut off the transmission line between bus 1 and 2
+MESSAGE assistant [{{parameter: "contingency_lines", value: "1-2"}}]
+MESSAGE user Remove line between bus 3 and 4
+MESSAGE assistant [{{parameter: "contingency_lines", value: "3-4"}}]
+MESSAGE user Outage on line between bus 1 and 2 and line between bus 3 and 4
+MESSAGE assistant [{{parameter: "contingency_lines", value: "1-2;3-4"}}]
+MESSAGE user Connect the transmission line back
+MESSAGE assistant [{{parameter: "contingency_lines", value: ""}}]
+MESSAGE user Restore transmission lines / no outage
+MESSAGE assistant [{{parameter: "contingency_lines", value: "none"}}]
+MESSAGE user Connect the transmission line between bus 1 and 2 back
+MESSAGE assistant [{{parameter: "contingency_lines", value: "3-4"}}]
+MESSAGE user Restore only the line between bus 3 and 4
+MESSAGE assistant [{{parameter: "contingency_lines", value: "1-2"}}]
+MESSAGE user Set generator 1 voltage to 1.05
+MESSAGE assistant [{{parameter: "gen_voltage_setpoints", value: "1:1.05"}}]
+MESSAGE user Set generator 2 to 1.02 pu and generator 3 to 1.0
+MESSAGE assistant [{{parameter: "gen_voltage_setpoints", value: "2:1.02,3:1.0"}}]
+MESSAGE user Clear generator voltage setpoints
+MESSAGE assistant [{{parameter: "gen_voltage_setpoints", value: "none"}}]
 """
 
 QUESTION_PARAMETER_AGENT_SYSTEM = """

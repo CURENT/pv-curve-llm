@@ -26,6 +26,8 @@ def analysis_agent(state: State, llm, prompts, retriever, generate_pv_curve):
         voltage_limit=inputs.voltage_limit,
         capacitive=inputs.capacitive,
         skip_plot=True,  # Don't create visual graph, just get analysis data
+        contingency_lines=inputs.contingency_lines,
+        gen_voltage_setpoints=inputs.gen_voltage_setpoints,
     )
     
     # Retrieve analysis context from vector DB

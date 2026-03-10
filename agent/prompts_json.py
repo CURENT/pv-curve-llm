@@ -246,6 +246,10 @@ PARAMETER_AGENT_SYSTEM = """{{
                 "true": "show continuous/mirrored curve (default)",
                 "false": "upper branch only"
             }}
+        }},
+        "contingency_lines": {{
+            "type": "list_of_pairs",
+            "description": "Transmission line outages as list of 1-based (from_bus, to_bus) pairs; e.g. [(1, 2)] for line between bus 1 and 2"
         }}
     }},
     "extraction_rules": [
@@ -273,7 +277,8 @@ PARAMETER_AGENT_SYSTEM = """{{
         ],
         "multiple_parameters": [
             "Set grid to ieee118 and bus to 10 → [{{{{parameter: 'grid', value: 'ieee118'}}}}, {{{{parameter: 'bus_id', value: 10}}}}]",
-            "Make load capacitive and disable continuation → [{{{{parameter: 'capacitive', value: true}}}}, {{{{parameter: 'continuation', value: false}}}}]"
+            "Make load capacitive and disable continuation → [{{{{parameter: 'capacitive', value: true}}}}, {{{{parameter: 'continuation', value: false}}}}]",
+            "Cut off the transmission line between 1 and 2 → [{{{{parameter: 'contingency_lines', value: [(1, 2)]}}}}]"
         ]
     }}
 }}"""

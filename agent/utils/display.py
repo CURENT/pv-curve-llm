@@ -63,6 +63,16 @@ def display_parameters(inputs):
     table.add_row("Power factor", str(inputs.power_factor))
     table.add_row("Voltage threshold to stop", f"{inputs.voltage_limit} pu")
     table.add_row("Load type", "Capacitive" if inputs.capacitive else "Inductive")
+    if getattr(inputs, "contingency_lines", None):
+        line_str = ", ".join(f"Bus {a} – Bus {b}" for (a, b) in inputs.contingency_lines)
+        table.add_row("Transmission line(s) out", line_str)
+    else:
+        table.add_row("Transmission line(s) out", "None")
+    gv = getattr(inputs, "gen_voltage_setpoints", None)
+    if gv:
+        table.add_row("Generator voltage setpoints", ", ".join(f"Gen {k}: {v} pu" for k, v in sorted(gv.items())))
+    else:
+        table.add_row("Generator voltage setpoints", "None")
 
     console.print(table)
 

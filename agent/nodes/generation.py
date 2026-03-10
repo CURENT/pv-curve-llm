@@ -3,6 +3,8 @@ from agent.state.app_state import State
 from agent.schemas.response import NodeResponse
 from agent.schemas.parameter import InputModifier
 from agent.utils.display import display_executing_node, console
+from agent.utils.common_utils import apply_contingency_lines_update
+from agent.nodes.parameter import _parse_gen_voltage_setpoints_string
 from datetime import datetime
 
 def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
@@ -34,7 +36,27 @@ def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
                     converted_value = modification.value.lower() in ["true", "yes", "1", "on"]
                 else:
                     converted_value = bool(modification.value)
-            
+            elif modification.parameter == "contingency_lines":
+                val = str(modification.value).strip().lower()
+                if val in ("", "none", "clear"):
+                    converted_value = None
+                else:
+                    try:
+                        pairs = [tuple(int(b) for b in pair.split("-")) for pair in val.split(";")]
+                        if not all(len(p) == 2 for p in pairs):
+                            continue
+                        converted_value = pairs
+                    except (ValueError, AttributeError):
+                        continue
+            elif modification.parameter == "gen_voltage_setpoints":
+                converted_value = _parse_gen_voltage_setpoints_string(modification.value)
+                if converted_value is None and str(modification.value).strip().lower() not in ("", "none", "clear"):
+                    continue
+
+            if modification.parameter == "contingency_lines":
+                converted_value = apply_contingency_lines_update(
+                    getattr(inputs, "contingency_lines", None), converted_value
+                )
             updates[modification.parameter] = converted_value
         
         # Update inputs with extracted parameters
@@ -50,6 +72,8 @@ def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
         voltage_limit=inputs.voltage_limit,
         capacitive=inputs.capacitive,
         skip_plot=False,  # Generate the visual graph
+        contingency_lines=inputs.contingency_lines,
+        gen_voltage_setpoints=inputs.gen_voltage_setpoints,
     )
     
     load_type = "capacitive" if inputs.capacitive else "inductive"
