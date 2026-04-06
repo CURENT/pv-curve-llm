@@ -978,8 +978,10 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ### Contributors
 
+- [Junjie Yin](https://github.com/eejyin)
 - [Matt Cannavaro](https://www.github.com/mcnvr)
 - [Hank Lin](https://github.com/Hank0857)
+- [Nick West](https://github.com/TheHashTableSlasher)
 
 ---
 
