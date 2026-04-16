@@ -1,0 +1,27 @@
+services:
+  web:
+    build:
+      # Build context is the repo root so agent/ and web/ are both accessible
+      context: ..
+      dockerfile: web/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      # Persistent volume for SQLite DB and generated PV curve plots
+      - pv_data:/data
+    # Load environment from the backend .env file (copy from .env.example first)
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override paths to point at the persistent volume inside the container
+      DATABASE_PATH: /data/web_app.db
+      PLOTS_PATH: /data/plots
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  pv_data:

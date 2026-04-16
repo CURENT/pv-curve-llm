@@ -1,0 +1,24 @@
+# Web framework
+fastapi
+uvicorn[standard]
+websockets
+
+# Database
+sqlalchemy
+
+# Validation & settings
+pydantic
+pydantic-settings
+
+# Security - API key encryption
+cryptography
+
+# Utilities
+python-multipart
+python-dotenv
+
+# NOTE: Agent dependencies (langchain, langgraph, pandapower, etc.)
+# are already installed via the root requirements.txt
+# Make sure to install both:
+#   pip install -r ../../requirements.txt
+#   pip install -r requirements.txt

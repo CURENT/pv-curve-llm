@@ -1,0 +1,35 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Deploy with: connect this repo on render.com and click "Apply Blueprint"
+
+services:
+  - type: web
+    name: pv-curve-agent
+    env: docker
+    # Build context is the repo root; Dockerfile is in web/
+    dockerfilePath: ./web/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    # Render Free tier sleeps after inactivity; upgrade to Starter ($7/mo) for always-on
+    plan: free
+    envVars:
+      # Auto-generated secrets — Render sets these once and persists them
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      # Paths inside the persistent disk (must match disk.mountPath below)
+      - key: DATABASE_PATH
+        value: /data/web_app.db
+      - key: PLOTS_PATH
+        value: /data/plots
+      # Default LLM provider (users configure their own key via the Settings page)
+      - key: DEFAULT_LLM_PROVIDER
+        value: ollama
+      - key: DEFAULT_OLLAMA_URL
+        value: http://localhost:11434
+      - key: DEFAULT_OLLAMA_MODEL
+        value: llama3.1:8b
+    disk:
+      name: pv-curve-data
+      mountPath: /data
+      sizeGB: 10
