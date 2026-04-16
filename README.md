@@ -1,14 +1,14 @@
 # PV Curve Agent: AI-Powered Voltage Stability Analysis
 
-<img src="https://github.com/CURENT/andes/raw/master/docs/source/images/sponsors/CURENT_Logo_NameOnTrans.png" alt="CURENT ERC Logo" width="300" height="auto">
+
 
 **Conversational agent for power system voltage stability analysis through PV curve generation and AI analysis**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/CURENT/pv-curve-llm/blob/master/LICENSE)
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-[![GitHub last commit (master)](https://img.shields.io/github/last-commit/CURENT/pv-curve-llm/master?label=last%20commit%20to%20master)](https://github.com/CURENT/pv-curve-llm/commits/master/)
-[![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FCURENT%2Fpv-curve-llm&countColor=%2337d67a&style=plastic)](https://visitorbadge.io/status?path=https%3A%2F%2Fgithub.com%2FCURENT%2Fpv-curve-llm)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[License: MIT](https://github.com/CURENT/pv-curve-llm/blob/master/LICENSE)
+[Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/#active)
+[GitHub last commit (master)](https://github.com/CURENT/pv-curve-llm/commits/master/)
+[Visitors](https://visitorbadge.io/status?path=https%3A%2F%2Fgithub.com%2FCURENT%2Fpv-curve-llm)
+[Python 3.8+](https://www.python.org/downloads/)
 
 ## Table of Contents
 
@@ -78,7 +78,7 @@ This project is part of the **CURENT Large-scale Testbed (LTB)** research initia
 - **Adaptive Routing**: Conditional workflow paths based on query complexity and state
 
 ### 🎯 Flexible Deployment
- 
+
 - **Multiple LLM Providers**: Choose between OpenAI API (recommended) or Ollama local models
 - **Session Management**: Persistent conversation storage with JSON-based history
 - **Extensible Architecture**: Modular design enables easy addition of new capabilities
@@ -90,7 +90,7 @@ This project is part of the **CURENT Large-scale Testbed (LTB)** research initia
 
 The PV Curve Agent uses a graph-based architecture powered by LangGraph, where nodes represent specialized agents and edges define the flow of execution. This enables complex, stateful, multi-agent workflows with dynamic routing and error recovery.
 
-![Workflow Architecture](images/workflow.png)
+Workflow Architecture
 
 ### Core Components
 
@@ -168,20 +168,20 @@ git clone https://github.com/CURENT/pv-curve-llm.git
 cd pv-curve-llm
 ```
 
-2. **Create virtual environment**
+1. **Create virtual environment**
 
 ```bash
 python3.12 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
-3. **Install dependencies**
+1. **Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Setup Ollama models** (for local deployment)
+1. **Setup Ollama models** (for local deployment)
 
 ```bash
 ollama pull mxbai-embed-large  # Embedding model for RAG
@@ -189,7 +189,7 @@ ollama pull llama3.1:8b
 ollama create pv-curve -f agent/Modelfile
 ```
 
-5. **Configure OpenAI API** (recommended for better performance)
+1. **Configure OpenAI API** (recommended for better performance)
 
 ```bash
 # Create agent/.env file
@@ -315,7 +315,7 @@ The IEEE 118 system shows higher load margin (523 MW) compared to IEEE 14
 The system supports seven IEEE test networks:
 
 1. IEEE 14-bus: Small system for basic analysis (14 buses, 5 generators)
-2. IEEE 24-bus: Reliability test system (24 buses, 11 generators)
+2. IEEE 24-bus: Reliability test system (24 buses, 11 generators)lang
 3. IEEE 30-bus: Classic test case (30 buses, 6 generators)
 4. IEEE 39-bus: New England system (39 buses, 10 generators)
 5. IEEE 57-bus: Medium-sized network (57 buses, 7 generators)
@@ -343,20 +343,22 @@ Current parameters are now configured for capacitive load analysis.
 
 
 | Parameter       | Type   | Range                      | Default | Description                    |
-| ----------------- | -------- | ---------------------------- | --------- | -------------------------------- |
+| --------------- | ------ | -------------------------- | ------- | ------------------------------ |
 | `grid`          | string | ieee14/24/30/39/57/118/300 | ieee39  | IEEE test system               |
 | `bus_id`        | int    | 0-300                      | 5       | Bus to monitor voltage         |
 | `step_size`     | float  | 0.001-0.1                  | 0.01    | Load increment per step        |
 | `max_scale`     | float  | 1.0-10.0                   | 3.0     | Maximum load multiplier        |
-| `power_factor`  | float  | 0.0-1.0                    | 0.95    | Power factor (cos φ)          |
+| `power_factor`  | float  | 0.0-1.0                    | 0.95    | Power factor (cos φ)           |
 | `voltage_limit` | float  | 0.0-1.0                    | 0.4     | Minimum voltage threshold (pu) |
 | `capacitive`    | bool   | true/false                 | false   | Load type (false = inductive)  |
+| `contingency_lines`    | list   | 1-based (from_bus, to_bus) pairs; each pair must exist as a line or transformer on the selected grid | none | Transmission line(s) / transformer(s) out of service before the sweep (N-1 / N-k) |
+| `gen_voltage_setpoints`| map    | 1-based gen index → vm_pu; vm_pu in [voltage_limit, 1.2] pu per generator on the selected grid        | none | Override generator voltage magnitude setpoints (AVR targets) before the sweep     |
 
 ## LangGraph Workflow
 
 ### Workflow Architecture
 
-The agent uses a sophisticated LangGraph workflow with 11 interconnected nodes that handle classification, routing, planning, execution, and error recovery.
+The agent uses a sophisticated LangGraph workflow with 12 interconnected nodes that handle classification, routing, planning, execution, and error recovery.
 
 ```
 ┌─────────┐
@@ -365,41 +367,40 @@ The agent uses a sophisticated LangGraph workflow with 11 interconnected nodes t
      │
      ▼
 ┌────────────┐
-│ CLASSIFIER │ ─────► Categorizes user intent
+│ CLASSIFIER │
 └────┬───────┘
      │
      ▼
 ┌────────────┐
-│   ROUTER   │ ─────► Determines execution path
+│   ROUTER   │
 └────┬───────┘
      │
-     ├─────────────┬──────────────┬──────────────┬──────────────┐
-     ▼             ▼              ▼              ▼              ▼
-┌─────────┐   ┌─────────┐   ┌──────────┐   ┌────────────┐   ┌─────────┐
-│QUESTION │   │QUESTION │   │PARAMETER │   │ GENERATION │   │ PLANNER │
-│GENERAL  │   │PARAMETER│   │          │   │            │   │         │
-└────┬────┘   └────┬────┘   └────┬─────┘   └─────┬──────┘   └────┬────┘
-     │             │              │               │               │
-     │             │              │               │               ▼
-     │             │              │               │          ┌─────────────┐
-     │             │              │               │          │    STEP     │
-     │             │              │               │          │ CONTROLLER  │
-     │             │              │               │          └──────┬──────┘
-     │             │              │               │                 │
-     └─────────────┴──────────────┴───────────────┴─────────────────┤
-                                                                    │
-     ┌──────────────────────────────────────────────────────────────┘
-     │
-     ▼
-┌──────────────┐      ┌──────────────┐      ┌─────────┐
-│ ADVANCE STEP │ ───► │    SUMMARY   │ ───► │   END   │
-└──────────────┘      └──────────────┘      └─────────┘
-     ▲
-     │
+     ├────► QUESTION_GENERAL ───────► END | ADVANCE_STEP
+     ├────► QUESTION_PARAMETER ─────► END | ADVANCE_STEP
+     ├────► PARAMETER ──────────────► END | ADVANCE_STEP | ERROR_HANDLER
+     ├────► GENERATION ─────────────► END | ADVANCE_STEP | ERROR_HANDLER
+     ├────► ANALYSIS ───────────────► END | ADVANCE_STEP | ERROR_HANDLER
+     └────► PLANNER ─────────────────► STEP_CONTROLLER
+                                        ├──► QUESTION_GENERAL
+                                        ├──► QUESTION_PARAMETER
+                                        ├──► PARAMETER
+                                        ├──► GENERATION
+                                        ├──► ANALYSIS
+                                        ├──► ADVANCE_STEP
+                                        ├──► ERROR_HANDLER
+                                        └──► SUMMARY
+                                        
+┌────────────────┐
+│ ERROR_HANDLER  │ ─────► PARAMETER | GENERATION | ANALYSIS | ADVANCE_STEP | END
+└────────────────┘
+
 ┌──────────────┐
-│    ERROR     │
-│   HANDLER    │
+│ ADVANCE_STEP │ ─────► STEP_CONTROLLER | SUMMARY
 └──────────────┘
+
+┌─────────┐
+│ SUMMARY │ ─────► END
+└─────────┘
 ```
 
 ### Execution Paths
@@ -781,16 +782,14 @@ OLLAMA_BASE_URL=http://localhost:11434
 The vector database stores domain knowledge for RAG-enhanced responses. To customize:
 
 1. **Add Documents**: Place markdown files in `agent/data/`
-
-   ```bash
+  ```bash
    cp your_document.md agent/data/
-   ```
+  ```
 2. **Run Training Script**:
-
-   ```bash
+  ```bash
    cd agent
    python train.py
-   ```
+  ```
 3. **Verify**: Check `agent/vector_db/` for updated database
 
 See `agent/data/README.md` for detailed instructions on document formatting and best practices.
@@ -905,34 +904,28 @@ pv-curve-llm/
 ### How to Contribute
 
 1. **Fork the repository**
-
-   ```bash
+  ```bash
    git clone https://github.com/YOUR_USERNAME/pv-curve-llm.git
-   ```
+  ```
 2. **Create a feature branch**
-
-   ```bash
+  ```bash
    git checkout -b feature/amazing-feature
-   ```
+  ```
 3. **Make your changes**
-
-   - Follow code style guidelines
-   - Add tests for new features
-   - Update documentation
+  - Follow code style guidelines
+  - Add tests for new features
+  - Update documentation
 4. **Commit your changes**
-
-   ```bash
+  ```bash
    git commit -m 'Add amazing feature'
-   ```
+  ```
 5. **Push to your fork**
-
-   ```bash
+  ```bash
    git push origin feature/amazing-feature
-   ```
+  ```
 6. **Open a Pull Request**
-
-   - Describe your changes clearly
-   - Reference any related issues
+  - Describe your changes clearly
+  - Reference any related issues
 
 ### Reporting Issues
 
@@ -988,4 +981,3 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 **Maintained by**: CURENT Research Team
 **Contact**: [GitHub Issues](https://github.com/CURENT/pv-curve-llm/issues)
 
-<img src="https://github.com/CURENT/andes/raw/master/docs/source/images/sponsors/CURENT_Logo_NameOnTrans.png" alt="CURENT ERC Logo" width="200" height="auto">

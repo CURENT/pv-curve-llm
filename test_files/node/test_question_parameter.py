@@ -138,6 +138,33 @@ def test_with_current_inputs(mock_display):
 
 
 @patch('agent.nodes.question_parameter.display_executing_node')
+def test_context_includes_contingency_and_gen_setpoints(mock_display):
+    user_message = "What parameters do we have now?"
+    exchange = {
+        "user_input": "Set outage and generator voltage",
+        "assistant_response": "Done.",
+        "inputs_state": {
+            "grid": "ieee39",
+            "bus_id": 5,
+            "power_factor": 0.95,
+            "contingency_lines": [(2, 3), (3, 4)],
+            "gen_voltage_setpoints": {2: 1.02, 1: 1.05},
+        },
+    }
+    prompts = get_base_prompts()
+    state = get_initial_state(user_message, conversation_context=[exchange])
+    mock_llm = create_mock_llm("Current parameters listed.")
+
+    question_parameter_agent(state, mock_llm, prompts)
+
+    mock_display.assert_called_once_with("question_parameter")
+    messages = mock_llm.invoke.call_args[0][0]
+    system_prompt = messages[0]["content"]
+    assert "- Transmission Lines Out: 2-3, 3-4" in system_prompt
+    assert "- Generator Voltage Setpoints: 1:1.05, 2:1.02" in system_prompt
+
+
+@patch('agent.nodes.question_parameter.display_executing_node')
 def test_with_history(mock_display):
     user_message = "Compare step size in those runs."
     exchanges = [

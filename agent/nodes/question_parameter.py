@@ -4,6 +4,19 @@ from agent.utils.context import get_conversation_context
 from datetime import datetime
 from agent.utils.display import display_executing_node
 
+
+def _format_contingency_lines(contingency_lines):
+    if not contingency_lines:
+        return "None"
+    return ", ".join(f"bus{a}-bus{b}" for a, b in contingency_lines)
+
+
+def _format_gen_voltage_setpoints(gen_voltage_setpoints):
+    if not gen_voltage_setpoints:
+        return "None"
+    return ", ".join(f"{int(k)}:{v}pu" for k, v in sorted(gen_voltage_setpoints.items()))
+
+
 def question_parameter_agent(state: State, llm, prompts):
     
     display_executing_node("question_parameter")
@@ -28,6 +41,8 @@ def question_parameter_agent(state: State, llm, prompts):
                 parameter_context += f"- Voltage Limit: {inputs.get('voltage_limit', 'N/A')}\n"
                 parameter_context += f"- Load Type: {'Capacitive' if inputs.get('capacitive', False) else 'Inductive'}\n"
                 parameter_context += f"- Curve Type: {'Continuous' if inputs.get('continuation', True) else 'Stops at nose point'}\n"
+                parameter_context += f"- Transmission Lines Out: {_format_contingency_lines(inputs.get('contingency_lines'))}\n"
+                parameter_context += f"- Generator Voltage Setpoints: {_format_gen_voltage_setpoints(inputs.get('gen_voltage_setpoints'))}\n"
     
     system_prompt = prompts["question_parameter_agent"]["system"] + parameter_context
     messages = [
