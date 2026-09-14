@@ -5,7 +5,7 @@ services:
       context: ..
       dockerfile: web/Dockerfile
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
       # Persistent volume for SQLite DB and generated PV curve plots
       - pv_data:/data

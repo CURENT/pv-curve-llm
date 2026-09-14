@@ -40,28 +40,16 @@ Browse to **http://localhost:8080**.
 
 ---
 
-## Deploying to Render
+## Deploying to Cloudflare + AWS Lightsail
 
-1. Push this repository to GitHub.
-2. Go to [render.com](https://render.com) → **New → Blueprint** → connect your repo.
-3. Render detects `render.yaml` at the repo root — click **Apply** to provision the service and disk.
-4. Set `ENCRYPTION_KEY` in the Render dashboard → **Environment** if it wasn't auto-generated (the blueprint uses `generateValue: true` for both secrets).
-5. Trigger a deploy — the app will be live at `https://<app>.onrender.com`.
+Use the minimal deployment guide in [`web/DEPLOY.md`](../DEPLOY.md).
 
-**Verify the deployment:**
+That guide covers:
 
-```bash
-# Health check
-curl https://<app>.onrender.com/health
-# → {"status":"ok","active_sessions":0}
-
-# WebSocket (connection indicator in the header should turn green)
-# wss://<app>.onrender.com/ws
-
-# Generate a PV curve to confirm end-to-end flow
-```
-
-> **Free tier note:** Render Free spins down after ~15 minutes of inactivity (cold start ~30s). Upgrade to Starter ($7/month) for always-on.
+1. Cloudflare domain + DNS setup
+2. AWS Lightsail instance setup
+3. Docker Compose deployment
+4. HTTPS verification and update workflow
 
 ---
 
@@ -75,7 +63,7 @@ Copy `.env.example` to `.env` and fill in:
 | `ENCRYPTION_KEY` | *(required)* | Secret key for encrypting API keys in DB |
 | `JWT_SECRET` | *(auto-generated)* | Secret for future JWT auth |
 | `PLOTS_PATH` | `plots` | Directory where PV curve PNGs are saved |
-| `DEFAULT_LLM_PROVIDER` | `ollama` | `openai` or `ollama` |
+| `DEFAULT_LLM_PROVIDER` | `openai` | `openai` or `ollama` |
 | `DEFAULT_OLLAMA_URL` | `http://localhost:11434` | Ollama base URL |
 | `DEFAULT_OLLAMA_MODEL` | `llama3.1:8b` | Ollama model name |
 

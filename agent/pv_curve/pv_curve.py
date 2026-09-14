@@ -7,8 +7,8 @@ import andes
 import matplotlib
 import numpy as np
 
-# # FastAPI/web runs this code in a thread pool; macOS GUI backend (macosx) only works on the main thread.
-# matplotlib.use("Agg")
+# FastAPI/web runs this code in a thread pool; macOS GUI backend (macosx) only works on the main thread.
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 CASE_MAP = {

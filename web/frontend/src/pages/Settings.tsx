@@ -155,6 +155,9 @@ export default function SettingsPage() {
                 onChange={(e) => setOllamaUrl(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                `localhost` only works when backend and Ollama run on the same machine (local Docker). On a public deployment, use OpenAI or a publicly reachable Ollama URL.
+              </p>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-gray-700 dark:text-gray-300">Model</label>
