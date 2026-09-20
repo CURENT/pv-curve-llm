@@ -19,6 +19,15 @@ NUM_VECTORS = 10
 # Candidate pool size fetched from Chroma before reranking. i.e. CANDIDATE_VECTORS are fetched and reranked into the NUM_VECTORS most relevant.
 CANDIDATE_VECTORS = 40
 
+
+class OpenAIRetriever:
+    """
+    Temporary: no RAG for OpenAI.
+    Later: embed with OpenAI + search an OpenAI-built vector_db.
+    """
+    def invoke(self, query):
+        return []
+
 class SimpleRetriever:
     def __init__(self, base_retriever, reranker):
         self.base_retriever = base_retriever
@@ -30,7 +39,9 @@ class SimpleRetriever:
         
         return after
 
-def retriever():
+def retriever(provider: str = "ollama"):
+    if provider == "openai":
+        return OpenAIRetriever()
     embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
     
     if not os.path.exists(DB_LOCATION):

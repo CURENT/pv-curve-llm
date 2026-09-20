@@ -64,7 +64,7 @@ class WebSessionManager:
         os.makedirs(settings.plots_path, exist_ok=True)
 
         prompts = get_prompts()
-        retriever = make_retriever()
+        retriever = make_retriever(provider=provider)
         workflow = create_workflow(llm, prompts, retriever, generate_pv_curve)
 
         self.session_manager = SessionManager(workflow, provider, llm._model_name)

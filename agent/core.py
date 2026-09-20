@@ -27,7 +27,7 @@ def setup_dependencies(provider="ollama"):
         )
         llm._model_name = llm.model
 
-    retriever = _make_retriever()
+    retriever = _make_retriever(provider=provider)
 
     return llm, prompts, retriever
 
