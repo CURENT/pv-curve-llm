@@ -44,6 +44,16 @@ export interface ConversationDetail extends ConversationSummary {
   messages: ChatMessage[];
 }
 
+export interface PlotSummary {
+  id: string;
+  conversation_id: string;
+  grid: string;
+  bus_id: number;
+  plot_path?: string | null;
+  create_at?: string | null;
+}
+
+
 // ─── PV Curve result ─────────────────────────────────────────────────────────
 
 export interface PVCurveResult {

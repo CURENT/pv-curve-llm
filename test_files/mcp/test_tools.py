@@ -145,7 +145,7 @@ def test_generate_pv_curve_tool(mock_gen, mock_sm):
 
     def capture_and_return(state, *args, **kwargs):
         last_message_at_call.append(state["messages"][-1].content if state.get("messages") else None)
-        return {"messages": [AIMessage(content="Done")], "results": {"save_path": "/tmp/plot.png"}}
+        return {"messages": [AIMessage(content="Done")], "results": {"plot_path": "/tmp/plot.png"}}
 
     mock_gen.side_effect = capture_and_return
 
@@ -164,7 +164,7 @@ def test_generate_pv_curve_tool(mock_gen, mock_sm):
     mock_gen.assert_called_once()
     mock_sm.update_state.assert_called_once()
     assert out["success"] is True
-    assert out["results"] == {"save_path": "/tmp/plot.png"}
+    assert out["results"] == {"plot_path": "/tmp/plot.png"}
     assert out["image_file_url"] == "file:///tmp/plot.png"
     assert "state" in out
 

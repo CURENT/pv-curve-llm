@@ -77,24 +77,43 @@ export default function HistorySidebar() {
   return (
     <aside className="hidden md:flex flex-col w-56 flex-shrink-0 h-full bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
 
-      {/* ── Logo + New Chat button ─────────────────────────────────────────── */}
+      {/* ── Logo + Plots + New Chat ───────────────────────────────────────── */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-200 dark:border-gray-800">
         <span className="flex items-center gap-2 font-bold text-sm text-gray-900 dark:text-gray-100 select-none">
           <span className="text-indigo-600 text-lg">⚡</span>
           PV Curve
         </span>
 
-        <button
-          onClick={() => { startNew(); navigate("/chat"); }}
-          title="New chat"
-          className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-        >
-          {/* Pencil icon */}
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
-            <path d="M15.5 3.5a2.121 2.121 0 013 3L12 13l-4 1 1-4 6.5-6.5z" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-0.5">
+          {/* Plots gallery */}
+          <button
+            onClick={() => navigate("/plots")}
+            title="Plots"
+            className={`p-1.5 rounded-lg transition-colors ${
+              location.pathname === "/plots"
+                ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/40"
+                : "text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+            }`}
+          >
+            {/* Chart icon */}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path d="M3 3v18h18" />
+              <path d="M7 14l4-4 4 2 5-6" />
+            </svg>
+          </button>
+
+          {/* New chat */}
+          <button
+            onClick={() => { startNew(); navigate("/chat"); }}
+            title="New chat"
+            className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
+              <path d="M15.5 3.5a2.121 2.121 0 013 3L12 13l-4 1 1-4 6.5-6.5z" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* ── Conversation list ──────────────────────────────────────────────── */}

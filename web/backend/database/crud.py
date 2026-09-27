@@ -143,10 +143,12 @@ def create_pv_curve(
     return record
 
 
-def list_pv_curves(db: Session, conversation_id: str) -> list[PVCurve]:
+def list_pv_curves_by_session(db: Session, session_id: str) -> list[PVCurve]:
+    """All plots for a session, newest first."""
     return (
         db.query(PVCurve)
-        .filter(PVCurve.conversation_id == conversation_id)
-        .order_by(PVCurve.created_at.asc())
+        .join(Conversation, PVCurve.conversation_id == Conversation.id)
+        .filter(Conversation.session_id == session_id)
+        .order_by(PVCurve.created_at.desc())
         .all()
     )

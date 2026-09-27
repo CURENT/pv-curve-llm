@@ -5,6 +5,7 @@ import { wsService } from "./services/websocket";
 import HistorySidebar from "./components/Common/HistorySidebar";
 import ChatPage from "./pages/Chat";
 import SettingsPage from "./pages/Settings";
+import PlotsPage from "./pages/Plots"
 
 export default function App() {
   const isDark = useAppStore((s) => s.isDark);
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/chat/:conversationId" element={<ChatPage />} />
             <Route path="/history"              element={<Navigate to="/chat" replace />} />
             <Route path="/settings"             element={<SettingsPage />} />
+            <Route path="/plots"                element={<PlotsPage />} />
           </Routes>
         </div>
       </div>

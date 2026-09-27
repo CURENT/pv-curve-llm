@@ -270,10 +270,10 @@ def generate_pv_curve_tool(user_message: str, session_id: str) -> Dict[str, Any]
         
         # Build file URL for the image
         image_file_url = None
-        save_path = results.get("save_path")
-        if save_path:
-            # Resolve to absolute path (save_path from generate_pv_curve is already absolute)
-            absolute_path = os.path.abspath(save_path)
+        plot_path = results.get("plot_path")
+        if plot_path:
+            # Resolve to absolute path (plot_path from generate_pv_curve is already absolute)
+            absolute_path = os.path.abspath(plot_path)
             image_file_url = f"file://{absolute_path}"
         
         return {

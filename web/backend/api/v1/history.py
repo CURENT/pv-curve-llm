@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from web.backend.database.database import get_db
 from web.backend.database import crud
-from web.backend.schemas.chat import ConversationSummary, ConversationDetail, ChatMessage
+from web.backend.schemas.chat import ConversationSummary, ConversationDetail, ChatMessage, PlotSummary
 
 router = APIRouter()
 
@@ -55,3 +55,20 @@ def delete_conversation(conversation_id: str, db: Session = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return {"deleted": True, "conversation_id": conversation_id}
+
+
+@router.get("/plots", response_model=list[PlotSummary])
+def list_plots(session_id: str, db: Session = Depends(get_db)):
+    """Return all PV curve plots for a session, newest first."""
+    curves = crud.list_pv_curves_by_session(db, session_id)
+    return [
+        PlotSummary(
+            id=c.id,
+            conversation_id=c.conversation_id,
+            grid=c.grid,
+            bus_id=c.bus_id,
+            plot_path=c.plot_path,
+            created_at=c.created_at,
+        )
+        for c in curves
+    ]

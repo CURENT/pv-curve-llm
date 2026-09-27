@@ -104,7 +104,7 @@ def _build_targets(ss, max_scale, power_factor, capacitive):
     return p0_base, p0_target, q0_target
 
 
-def _build_plot(P_vals, V_vals, nose_idx, target_bus_idx, save_path):
+def _build_plot(P_vals, V_vals, nose_idx, target_bus_idx, plot_path):
     """Save a P–V figure (MW vs pu voltage) for the monitored bus.
 
     Args:
@@ -112,7 +112,7 @@ def _build_plot(P_vals, V_vals, nose_idx, target_bus_idx, save_path):
         V_vals: Sequence of voltage magnitude (pu) at the monitored bus.
         nose_idx: Index into ``P_vals`` / ``V_vals`` of the nose (max load) point.
         target_bus_idx: Bus index (same numbering as inputs) for axis label.
-        save_path: Output PNG path.
+        plot_path: Output PNG path.
     """
     plt.figure(figsize=(8, 6))
 
@@ -139,7 +139,7 @@ def _build_plot(P_vals, V_vals, nose_idx, target_bus_idx, save_path):
     plt.title("System P–V Curve (Voltage Stability Analysis)")
     plt.grid(True)
     plt.legend()
-    plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.savefig(plot_path, dpi=300, bbox_inches="tight")
     plt.close()
 
 
@@ -169,13 +169,13 @@ def generate_pv_curve(
         power_factor: Constant power-factor magnitude in (0, 1] for Q from P.
         voltage_limit: Results are truncated after voltage first drops below this (pu).
         capacitive: If True, leading reactive convention for Q targets.
-        skip_plot: If True, do not write a PNG; ``save_path`` in the result is None.
+        skip_plot: If True, do not write a PNG; ``plot_path`` in the result is None.
         contingency_lines: Optional list of ``(from_bus, to_bus)`` line outages before setup.
         gen_voltage_setpoints: Optional ``{pv_idx: vm_pu}`` before setup.
         continuation: If True, ``stop_at='FULL'``; else ``stop_at='NOSE'``.
 
     Returns:
-        Dict with curve arrays, nose metadata, limits, and ``save_path``.
+        Dict with curve arrays, nose metadata, limits, and ``plot_path``.
 
     Raises:
         ValueError: Unknown grid, invalid bus, no CPF points, or invalid contingencies / setpoints.
@@ -232,10 +232,10 @@ def generate_pv_curve(
     nose_p = P_vals[max_p_idx]
     nose_v = V_vals[max_p_idx]
     # print(bus_uid, lam, voltages)
-    save_path = None
+    plot_path = None
     if not skip_plot:
-        save_path = _get_output_path(grid)
-        _build_plot(P_vals, V_vals, max_p_idx, int(target_bus_idx), save_path)
+        plot_path = _get_output_path(grid)
+        _build_plot(P_vals, V_vals, max_p_idx, int(target_bus_idx), plot_path)
 
     curve_points = []
     initial_voltage = float(V_vals[0])
@@ -286,7 +286,7 @@ def generate_pv_curve(
         "load_margin_percent": float((nose_p - P_vals[0]) / P_vals[0] * 100) if P_vals[0] > 0 else 0,
         "converged_steps": len(P_vals),
         "voltage_limit": voltage_limit,
-        "save_path": save_path,
+        "plot_path": plot_path,
     }
 
 

@@ -11,6 +11,7 @@ import type {
   LLMTestResponse,
   ConversationSummary,
   ConversationDetail,
+  PlotSummary,
 } from "../types";
 
 const http = axios.create({
@@ -81,6 +82,14 @@ export async function getConversation(
 export async function deleteConversation(conversationId: string): Promise<void> {
   await http.delete(`/conversations/${conversationId}`);
 }
+
+// ─── Plots gallery ────────────────────────────────────────────────────────────
+
+export async function listPlots(sessionId: string): Promise<PlotSummary[]> {
+  const { data } = await http.get("/plots", { params: { session_id: sessionId } });
+  return data as PlotSummary[];
+}
+
 
 // ─── Health ───────────────────────────────────────────────────────────────────
 

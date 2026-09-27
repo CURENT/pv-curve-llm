@@ -9,7 +9,7 @@
  * On mobile the parameter panel slides in from the right.
  */
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ChatInterface from "../components/Chat/ChatInterface";
 import ParameterPanel from "../components/Parameters/ParameterPanel";
 import PVCurvePlot from "../components/Visualization/PVCurvePlot";
@@ -19,15 +19,24 @@ export default function ChatPage() {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const latestResult = useAppStore((s) => s.latestResult);
-
+  const viewingPlotId = useAppStore((s) => s.viewingPlotId);
+  const navigate = useNavigate();
+  const setViewingPlotId = useAppStore((s) => s.setViewingPlotId);
+  
+  function closePlotView() {
+    setViewingPlotId(null);
+    navigate("/plots");
+  }
   // Close drawer on Escape key (keyboard accessibility)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setSidebarOpen(false);
+      if (e.key !== "Escape") return;
+      if (viewingPlotId) closePlotView();
+      else setSidebarOpen(false);
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [viewingPlotId]);
 
   // If URL has a conversation id, switch to it on mount
   // (handled by History page via store)
@@ -53,18 +62,40 @@ export default function ChatPage() {
           </button>
         </div>
 
-        {/* Split: chat top, plot bottom — flex column */}
+        {/* Split: normal (chat top, plot bottom) OR viewing mode (plot top, chat bottom) */}
         <div className="flex-1 flex flex-col min-h-0">
-          {/* Chat takes flexible space */}
-          <div className={`flex flex-col min-h-0 ${latestResult ? "flex-[2]" : "flex-1"}`}>
-            <ChatInterface />
-          </div>
-
-          {/* PV Curve plot — only rendered after first result */}
-          {latestResult && (
-            <div className="flex-1 border-t border-gray-200 dark:border-gray-700 min-h-0 overflow-y-auto">
-              <PVCurvePlot />
-            </div>
+          {viewingPlotId ? (
+            // Plot viewing mode: plot above, chat below (50/50)
+            <>
+              <div className="flex-1 flex flex-col border-b border-gray-200 dark:border-gray-700 min-h-0">
+                <div className="flex justify-end px-2 py-1">
+                  <button
+                    onClick={closePlotView}
+                    className="text-xs px-2 py-1 rounded text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  >
+                    Back
+                  </button>
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                  <PVCurvePlot />
+                </div>
+              </div>
+              <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+                <ChatInterface />
+              </div>
+            </>
+          ) : (
+            // Normal mode: chat flexible, plot when result available
+            <>
+              <div className={`flex flex-col min-h-0 ${latestResult ? "flex-[2]" : "flex-1"}`}>
+                <ChatInterface />
+              </div>
+              {latestResult && (
+                <div className="flex-1 border-t border-gray-200 dark:border-gray-700 min-h-0 overflow-y-auto">
+                  <PVCurvePlot />
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

@@ -6,6 +6,7 @@ from agent.utils.display import display_executing_node, console
 from agent.utils.common_utils import apply_contingency_lines_update
 from agent.nodes.parameter import _parse_gen_voltage_setpoints_string
 from datetime import datetime
+import os
 
 def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
     
@@ -78,11 +79,15 @@ def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
     )
     
     load_type = "capacitive" if inputs.capacitive else "inductive"
+
+    filename = os.path.basename(results["plot_path"])
+    image_url = f"/plots/{filename}"
     
     generation_content = (
         f"PV curve generated for {inputs.grid.upper()} system (Bus {inputs.bus_id})\n"
         f"Load type: {load_type}, Power factor: {inputs.power_factor}\n"
-        f"Plot saved to {results['save_path']}"
+        # f"Plot saved to {results['save_path']}"
+        f"![PV curve]({image_url})"
     )
     
     # No analysis here - just generation
@@ -101,7 +106,7 @@ def generation_agent(state: State, llm, prompts, retriever, generate_pv_curve):
         message=generation_content,
         timestamp=datetime.now(),
         metadata={
-            "plot_path": results["save_path"],
+            "plot_path": results["plot_path"],
             "convergence_steps": results["converged_steps"]
         }
     )

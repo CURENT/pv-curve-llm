@@ -40,6 +40,8 @@ interface AppState {
   latestResult: PVCurveResult | null;
   latestPlotPath: string | null;
   setResult: (result: PVCurveResult, plotPath: string) => void;
+  viewingPlotId: string | null;
+  setViewingPlotId: (id: string | null) => void;
 
   // ── Parameters ────────────────────────────────────────────────────────────
   parameters: Parameters | null;
@@ -109,6 +111,10 @@ export const useAppStore = create<AppState>()(
       currentNode: null,
       setProcessing: (v, node = null) =>
         set({ isProcessing: v, currentNode: node }),
+
+      // Plot viewing mode
+      viewingPlotId: null,
+      setViewingPlotId: (id) => set({ viewingPlotId: id }),
 
       // PV Curve results
       latestResult: null,

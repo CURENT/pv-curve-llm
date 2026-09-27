@@ -48,3 +48,12 @@ class StreamUpdate(BaseModel):
     results: Optional[dict[str, Any]] = None
     plot_path: Optional[str] = None
     conversation_id: Optional[str] = None
+
+class PlotSummary(BaseModel):
+    """One tile in the plots gallery."""
+    id: str
+    conversation_id: str
+    grid: str
+    bus_id: int
+    plot_path: Optional[str] = None
+    created_at: Optional[datetime] = None
