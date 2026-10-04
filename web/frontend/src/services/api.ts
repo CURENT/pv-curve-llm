@@ -98,6 +98,13 @@ export async function deleteConversation(conversationId: string): Promise<void> 
   await http.delete(`/conversations/${conversationId}`);
 }
 
+// ─── Transmission lines  ────────────────────────────────────────────────────────────
+
+export async function getGridLines(grid: string): Promise<[number, number][]> {
+  const { data } = await http.get(`/grids/${grid}/lines`);
+  return data.lines as [number, number][];
+}
+
 // ─── Plots gallery ────────────────────────────────────────────────────────────
 
 export async function listPlots(sessionId: string): Promise<PlotSummary[]> {

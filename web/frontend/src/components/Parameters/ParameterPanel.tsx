@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppStore } from "../../store/appStore";
-import { getParameters, updateParameters, resetParameters } from "../../services/api";
+import { getParameters, updateParameters, resetParameters, getGridLines } from "../../services/api";
 import type { Parameters, GridSystem } from "../../types";
 
 const GRIDS: { value: GridSystem; label: string; maxBus: number }[] = [
@@ -33,6 +33,28 @@ function validate(draft: Parameters): Errors {
   return errors;
 }
 
+// Helper functions to show the transmission lines
+type Line = [number, number];
+
+function keyOf(a: number, b: number) {
+  return a < b ? `${a}-${b}` : `${b}-${a}`;
+}
+
+function isOut(out: Line[] | null, a: number, b: number) {
+  if (!out) return false;
+  const k = keyOf(a, b);
+  return out.some(([x, y]) => keyOf(x, y) === k);
+}
+
+function toggleLine(out: Line[] | null, a: number, b: number): Line[] {
+  const current = out ?? [];
+  if (isOut(current, a, b)) {
+    return current.filter(([x, y]) => keyOf(x, y) !== keyOf(a, b));
+  }
+  return [...current, [a, b]];
+}
+
+
 interface Props {
   className?: string;
 }
@@ -49,6 +71,8 @@ export default function ParameterPanel({ className = "" }: Props) {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [openLines, setOpenLines] = useState(false);
+  const [allLines, setAllLines] = useState<[number, number][]>([]);
 
   // Fetch parameters from backend when session is available
   useEffect(() => {
@@ -68,6 +92,14 @@ export default function ParameterPanel({ className = "" }: Props) {
   useEffect(() => {
     if (storeParams && !isDirty) setDraft(storeParams);
   }, [storeParams, isDirty]);
+
+  // Get transmission lines for the system
+  useEffect(() => {
+    if (!draft) return;
+    getGridLines(draft.grid)
+      .then(setAllLines)
+      .catch(() => setAllLines([]));
+  }, [draft?.grid]);
 
   function patch<K extends keyof Parameters>(key: K, value: Parameters[K]) {
     setDraft((prev) => {
@@ -143,8 +175,11 @@ export default function ParameterPanel({ className = "" }: Props) {
             const g = e.target.value as GridSystem;
             const maxBus = GRIDS.find((x) => x.value === g)?.maxBus ?? 300;
             const bus = Math.min(draft.bus_id, maxBus);
-            setDraft((p) => p ? { ...p, grid: g, bus_id: bus } : p);
-            setIsDirty(true);
+            setDraft((p) =>
+              p
+                ? { ...p, grid: g, bus_id: bus, contingency_lines: [] }
+                : p
+            );            setIsDirty(true);
             setSaved(false);
           }}
           className={selectCls}
@@ -285,11 +320,53 @@ export default function ParameterPanel({ className = "" }: Props) {
       {/* ── Transmission line ─────────────────────────────────────────────── */}
       <Field
         label="Transmission line(s) out"
-        hint="N-1/N-k: which lines are out of service before the sweep (1-based bus ends)"
+        hint="N-1/N-k: click a pair to take it out / put it back"
       >
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 font-mono text-xs text-gray-800 dark:text-gray-200">
-          {formatTransmissionLinesOut(draft.contingency_lines)}
-        </div>
+        {/* summary — click to open/close */}
+        <button
+          type="button"
+          onClick={() => setOpenLines((v) => !v)}
+          className="w-full flex items-center justify-between gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 text-xs text-gray-800 dark:text-gray-200"
+        >
+          <span className="font-mono text-left truncate">
+            {formatTransmissionLinesOut(draft.contingency_lines)}
+          </span>
+          <span
+            className={
+              "shrink-0 text-base text-gray-400 dark:text-gray-500 transition-transform " +
+              (openLines ? "rotate-180" : "")
+            }
+            aria-hidden
+          >
+            ▾
+          </span>
+        </button>
+
+        {/* grid of all lines */}
+        {openLines && (
+          <div className="mt-2 max-h-48 overflow-y-auto grid grid-cols-3 gap-0 border border-gray-200 dark:border-gray-700 rounded-lg">
+            {allLines.map(([a, b]) => {
+              const out = isOut(draft.contingency_lines, a, b);
+              return (
+                <button
+                  key={`${a}-${b}`}
+                  type="button"
+                  onClick={() =>
+                    patch("contingency_lines", toggleLine(draft.contingency_lines, a, b))
+                  }
+                  className={
+                    "px-2 py-1.5 text-xs font-mono border border-gray-100 dark:border-gray-800 " +
+                    (out
+                      ? "line-through text-gray-400 dark:text-gray-500"
+                      : "text-gray-800 dark:text-gray-200")
+                  }
+                >
+                  {a}-{b}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </Field>
 
       {/* ── Generator voltage setpoints ─────────────────────────────────────── */}

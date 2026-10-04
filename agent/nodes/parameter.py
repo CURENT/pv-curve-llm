@@ -156,6 +156,11 @@ def parameter_agent(state: State, llm, prompts):
         updates[modification.parameter] = converted_value
         reply_parts.append(f"{modification.parameter} to {converted_value}")
     
+    # Grid change invalidates old line outages (unless AI also set new ones this turn)
+    if "grid" in updates and updates["grid"] != current_inputs.grid:
+        if "contingency_lines" not in updates:
+            updates["contingency_lines"] = None
+            
     new_inputs = current_inputs.model_copy(update=updates)
     
     if len(reply_parts) == 1:

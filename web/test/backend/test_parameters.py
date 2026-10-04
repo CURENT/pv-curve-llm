@@ -95,3 +95,11 @@ def test_parameters_are_isolated_per_conversation(client, db):
 
     assert r1.json()["parameters"]["grid"] == "ieee39"
     assert r2.json()["parameters"]["grid"] == "ieee14"
+
+def test_get_grid_lines_ieee14(client):
+    r = client.get("/api/v1/grids/ieee14/lines")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["grid"] == "ieee14"
+    assert [1, 2] in data["lines"]
+    assert len(data["lines"]) > 0

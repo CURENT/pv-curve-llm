@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+import andes
+from agent.pv_curve.pv_curve import CASE_MAP
 
 from web.backend.database.database import get_db
 from web.backend.services import session_service
@@ -60,3 +62,15 @@ def reset_parameters(session_id: str, conversation_id: str | None = None, db: Se
     defaults = Inputs()
     _save(session_id, conversation_id, defaults, db)
     return ParametersResponse(session_id=session_id, conversation_id=conversation_id, parameters=defaults)
+    
+
+@router.get("/grids/{grid}/lines")
+def get_grid_lines(grid: str):
+    if grid not in CASE_MAP:
+        raise HTTPException(status_code=404, detail=f"Unknown grid: {grid}")
+    ss = andes.load(andes.get_case(CASE_MAP[grid]), setup=False, no_output=True)
+    pairs = {
+        tuple(sorted((int(ss.Line.bus1.v[i]), int(ss.Line.bus2.v[i]))))
+        for i in range(len(ss.Line.bus1.v))
+    }
+    return {"grid": grid, "lines": [list(p) for p in sorted(pairs)]}
