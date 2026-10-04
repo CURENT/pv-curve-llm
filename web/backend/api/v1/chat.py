@@ -101,6 +101,12 @@ async def websocket_chat(
             assistant_text = "\n\n".join(c for c in assistant_chunks if c).strip()
             if assistant_text:
                 crud.create_message(db, conversation_id, role="assistant", content=assistant_text)
+            
+            inputs_obj = manager.current_inputs
+            if inputs_obj:
+                crud.set_conversation_parameters(
+                    db, conversation_id, inputs_obj.model_dump()
+                )
 
             # --- Persist PV curve if generated ---
             if final_results:

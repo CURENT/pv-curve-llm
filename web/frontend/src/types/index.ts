@@ -1,8 +1,7 @@
 // ─── Parameter types (mirrors agent/schemas/inputs.py) ─────────────────────
 
 export type GridSystem =
-  | "ieee14" | "ieee24" | "ieee30" | "ieee39"
-  | "ieee57" | "ieee118" | "ieee300";
+  | "ieee14" | "ieee39" | "ieee118" | "ieee300";
 
 export interface Parameters {
   grid: GridSystem;

@@ -84,6 +84,17 @@ def update_conversation_title(db: Session, conversation_id: str, title: str) -> 
     db.refresh(record)
     return record
 
+def get_conversation_parameters(db: Session, conversation_id: str) -> Optional[dict]:
+    conv = get_conversation(db, conversation_id)
+    if not conv or not conv.parameters:
+        return None
+    return json.loads(conv.parameters)
+def set_conversation_parameters(db: Session, conversation_id: str, params: dict) -> None:
+    conv = get_conversation(db, conversation_id)
+    if not conv:
+        return
+    conv.parameters = json.dumps(params)
+    db.commit()
 
 # ---------------------------------------------------------------------------
 # Message CRUD

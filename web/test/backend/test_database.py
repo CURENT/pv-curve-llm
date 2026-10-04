@@ -87,3 +87,14 @@ def test_update_session_llm_config(db):
 def test_get_nonexistent_session(db):
     result = crud.get_session(db, "does-not-exist")
     assert result is None
+
+def test_conversation_parameters_roundtrip(db):
+    crud.create_session(db, "session-db-params")
+    conv = crud.create_conversation(db, "session-db-params")
+
+    assert crud.get_conversation_parameters(db, conv.id) is None
+
+    crud.set_conversation_parameters(db, conv.id, {"grid": "ieee14", "bus_id": 4})
+    saved = crud.get_conversation_parameters(db, conv.id)
+    assert saved["grid"] == "ieee14"
+    assert saved["bus_id"] == 4

@@ -14,6 +14,7 @@ import {
   listConversations,
   getConversation,
   deleteConversation,
+  resetParameters,
 } from "../../services/api";
 import type { ConversationSummary } from "../../types";
 
@@ -24,6 +25,7 @@ export default function HistorySidebar() {
   const setConversations = useAppStore((s) => s.setConversations);
   const setMessages      = useAppStore((s) => s.setMessages);
   const setConversationId = useAppStore((s) => s.setConversationId);
+  const setParameters = useAppStore((s) => s.setParameters);
   const startNew         = useAppStore((s) => s.startNewConversation);
   const isDark           = useAppStore((s) => s.isDark);
   const toggleDark       = useAppStore((s) => s.toggleDark);
@@ -104,7 +106,14 @@ export default function HistorySidebar() {
 
           {/* New chat */}
           <button
-            onClick={() => { startNew(); navigate("/chat"); }}
+            onClick={async () => {
+              startNew();
+              if (sessionId) {
+                const defaults = await resetParameters(sessionId);
+                setParameters(defaults);
+              }
+              navigate("/chat");
+            }}
             title="New chat"
             className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >

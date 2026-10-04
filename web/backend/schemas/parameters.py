@@ -7,11 +7,13 @@ class ParametersResponse(BaseModel):
     """Current parameter state for a session."""
     session_id: str
     parameters: Inputs
+    conversation_id: Optional[str] = None
 
 
 class ParametersUpdateRequest(BaseModel):
     """Partial update — only the fields the user wants to change."""
     session_id: str
+    conversation_id: Optional[str] = None
     grid: Optional[GridSystem] = None
     bus_id: Optional[int] = None
     step_size: Optional[float] = None

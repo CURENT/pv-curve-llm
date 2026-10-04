@@ -5,10 +5,7 @@ import type { Parameters, GridSystem } from "../../types";
 
 const GRIDS: { value: GridSystem; label: string; maxBus: number }[] = [
   { value: "ieee14",  label: "IEEE 14",  maxBus: 14  },
-  { value: "ieee24",  label: "IEEE 24",  maxBus: 24  },
-  { value: "ieee30",  label: "IEEE 30",  maxBus: 30  },
   { value: "ieee39",  label: "IEEE 39",  maxBus: 39  },
-  { value: "ieee57",  label: "IEEE 57",  maxBus: 57  },
   { value: "ieee118", label: "IEEE 118", maxBus: 118 },
   { value: "ieee300", label: "IEEE 300", maxBus: 300 },
 ];
@@ -42,6 +39,7 @@ interface Props {
 
 export default function ParameterPanel({ className = "" }: Props) {
   const sessionId = useAppStore((s) => s.sessionId);
+  const conversationId = useAppStore((s) => s.conversationId);
   const storeParams = useAppStore((s) => s.parameters);
   const setParameters = useAppStore((s) => s.setParameters);
 
@@ -55,10 +53,16 @@ export default function ParameterPanel({ className = "" }: Props) {
   // Fetch parameters from backend when session is available
   useEffect(() => {
     if (!sessionId) return;
-    getParameters(sessionId)
-      .then((p) => { setDraft(p); setParameters(p); })
-      .catch(() => {/* backend not ready yet */});
-  }, [sessionId]);
+    setIsDirty(false);
+    setErrors({});
+    setSaved(false);
+    getParameters(sessionId, conversationId)
+      .then((p) => {
+        setDraft(p);
+        setParameters(p);
+      })
+      .catch(() => {});
+  }, [sessionId, conversationId]);
 
   // Sync draft if store changes from outside (e.g. LLM updated params; websocket refetched GET /parameters)
   useEffect(() => {
@@ -86,7 +90,7 @@ export default function ParameterPanel({ className = "" }: Props) {
     setSaving(true);
     setSaveError(null);
     try {
-      const updated = await updateParameters(sessionId, draft);
+      const updated = await updateParameters(sessionId, draft, conversationId);
       setParameters(updated);
       setDraft(updated);
       setIsDirty(false);
@@ -103,7 +107,7 @@ export default function ParameterPanel({ className = "" }: Props) {
     if (!sessionId) return;
     setSaving(true);
     try {
-      const defaults = await resetParameters(sessionId);
+      const defaults = await resetParameters(sessionId, conversationId);
       setParameters(defaults);
       setDraft(defaults);
       setErrors({});

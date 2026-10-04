@@ -4,6 +4,7 @@ These don't need a real LLM — they only touch the parameter cache logic.
 """
 import pytest
 from web.backend.utils.cache import session_cache
+from web.backend.database import crud
 
 SESSION_ID = "test-session-params-001"
 
@@ -70,3 +71,27 @@ def test_update_power_factor_out_of_range(client):
         "power_factor": 1.5,
     })
     assert response.status_code == 422
+
+def test_parameters_are_isolated_per_conversation(client, db):
+    crud.create_session(db, SESSION_ID)
+    chat1 = crud.create_conversation(db, SESSION_ID, title="IEEE39 chat")
+    chat2 = crud.create_conversation(db, SESSION_ID, title="IEEE14 chat")
+
+    client.post("/api/v1/parameters", json={
+        "session_id": SESSION_ID,
+        "conversation_id": chat1.id,
+        "grid": "ieee39",
+        "bus_id": 5,
+    })
+    client.post("/api/v1/parameters", json={
+        "session_id": SESSION_ID,
+        "conversation_id": chat2.id,
+        "grid": "ieee14",
+        "bus_id": 4,
+    })
+
+    r1 = client.get(f"/api/v1/parameters?session_id={SESSION_ID}&conversation_id={chat1.id}")
+    r2 = client.get(f"/api/v1/parameters?session_id={SESSION_ID}&conversation_id={chat2.id}")
+
+    assert r1.json()["parameters"]["grid"] == "ieee39"
+    assert r2.json()["parameters"]["grid"] == "ieee14"

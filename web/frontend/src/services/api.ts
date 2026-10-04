@@ -22,26 +22,41 @@ const http = axios.create({
 
 // ─── Parameters ──────────────────────────────────────────────────────────────
 
-export async function getParameters(sessionId: string): Promise<Parameters> {
-  const { data } = await http.get("/parameters", { params: { session_id: sessionId } });
+export async function getParameters(
+  sessionId: string,
+  conversationId?: string | null
+): Promise<Parameters> {
+  const { data } = await http.get("/parameters", {
+    params: { session_id: sessionId, conversation_id: conversationId ?? undefined },
+  });
   return data.parameters as Parameters;
 }
 
 export async function updateParameters(
   sessionId: string,
-  updates: Partial<Parameters>
+  updates: Partial<Parameters>,
+  conversationId?: string | null
 ): Promise<Parameters> {
-  const { data } = await http.post("/parameters", { session_id: sessionId, ...updates });
-  return data.parameters as Parameters;
-}
-
-export async function resetParameters(sessionId: string): Promise<Parameters> {
-  const { data } = await http.post("/parameters/reset", null, {
-    params: { session_id: sessionId },
+  const { data } = await http.post("/parameters", {
+    session_id: sessionId,
+    conversation_id: conversationId ?? undefined,
+    ...updates,
   });
   return data.parameters as Parameters;
 }
 
+export async function resetParameters(
+  sessionId: string,
+  conversationId?: string | null
+): Promise<Parameters> {
+  const { data } = await http.post("/parameters/reset", null, {
+    params: {
+      session_id: sessionId,
+      conversation_id: conversationId ?? undefined,
+    },
+  });
+  return data.parameters as Parameters;
+}
 // ─── LLM Settings ─────────────────────────────────────────────────────────────
 
 export async function getLLMConfig(sessionId: string): Promise<LLMConfigResponse> {

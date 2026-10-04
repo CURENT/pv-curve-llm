@@ -25,6 +25,7 @@ class Conversation(Base):
     id = Column(Text, primary_key=True)
     session_id = Column(Text, ForeignKey("sessions.id"), nullable=False)
     title = Column(Text, nullable=True)
+    parameters = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
 
 

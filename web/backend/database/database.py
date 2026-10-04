@@ -2,6 +2,8 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from web.backend.core.config import get_settings
 import os
+from sqlalchemy import text
+
 
 
 class Base(DeclarativeBase):
@@ -39,7 +41,11 @@ def init_db():
     """Create all tables. Call once at application startup."""
     from web.backend.database import models  # noqa: F401 - registers models
     Base.metadata.create_all(bind=engine)
-
+    with engine.connect() as conn:
+        cols = [row[1] for row in conn.execute(text("PRAGMA table_info(conversations)"))]
+        if "parameters" not in cols:
+            conn.execute(text("ALTER TABLE conversations ADD COLUMN parameters TEXT"))
+            conn.commit()
 
 def get_db():
     """FastAPI dependency: yields a database session and closes it after use."""

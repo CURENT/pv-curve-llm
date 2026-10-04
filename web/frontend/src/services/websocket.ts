@@ -123,13 +123,11 @@ class WebSocketService {
         store.setProcessing(false, null);
         // Agent may have updated inputs (e.g. "change power factor to 0.9"); REST panel only had mount/Apply — sync now.
         {
-          const sid = store.sessionId;
-          if (sid) {
-            void getParameters(sid)
+          const { sessionId, conversationId } = useAppStore.getState();
+          if (sessionId) {
+            void getParameters(sessionId, conversationId)
               .then((p) => useAppStore.getState().setParameters(p))
-              .catch(() => {
-                /* offline or session evicted — ignore */
-              });
+              .catch(() => {});
           }
         }
         break;
