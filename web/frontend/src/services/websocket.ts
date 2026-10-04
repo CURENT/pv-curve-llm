@@ -14,6 +14,7 @@
  */
 import { useAppStore } from "../store/appStore";
 import { getParameters } from "./api";
+import { listConversations } from "./api";
 import type { WSIncoming, WSOutgoing } from "../types";
 
 const WS_URL = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
@@ -127,6 +128,9 @@ class WebSocketService {
           if (sessionId) {
             void getParameters(sessionId, conversationId)
               .then((p) => useAppStore.getState().setParameters(p))
+              .catch(() => {});
+              void listConversations(sessionId)
+              .then((list) => useAppStore.getState().setConversations(list))
               .catch(() => {});
           }
         }

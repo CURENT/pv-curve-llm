@@ -2,7 +2,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import Optional
-
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from web.backend.database.models import UserSession, Conversation, Message, PVCurve
@@ -55,10 +55,21 @@ def get_conversation(db: Session, conversation_id: str) -> Optional[Conversation
 
 
 def list_conversations(db: Session, session_id: str) -> list[Conversation]:
+    last_msg = (
+        db.query(
+            Message.conversation_id,
+            func.max(Message.timestamp).label("last_at"),
+        )
+        .group_by(Message.conversation_id)
+        .subquery()
+    )
     return (
         db.query(Conversation)
+        .outerjoin(last_msg, Conversation.id == last_msg.c.conversation_id)
         .filter(Conversation.session_id == session_id)
-        .order_by(Conversation.created_at.desc())
+        .order_by(
+            func.coalesce(last_msg.c.last_at, Conversation.created_at).desc()
+        )
         .all()
     )
 

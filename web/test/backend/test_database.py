@@ -3,6 +3,8 @@ Tests for the database CRUD layer.
 Uses the in-memory DB from conftest.py fixtures.
 """
 import pytest
+import time
+
 from web.backend.database import crud
 
 
@@ -98,3 +100,15 @@ def test_conversation_parameters_roundtrip(db):
     saved = crud.get_conversation_parameters(db, conv.id)
     assert saved["grid"] == "ieee14"
     assert saved["bus_id"] == 4
+
+def test_list_conversations_orders_by_latest_message(db):
+    crud.create_session(db, "session-order")
+    old = crud.create_conversation(db, "session-order", title="Old chat")
+    new = crud.create_conversation(db, "session-order", title="New chat")
+    crud.create_message(db, old.id, "user", "first")
+    crud.create_message(db, new.id, "user", "second")
+    time.sleep(0.01)  # ensure a later timestamp
+    crud.create_message(db, old.id, "assistant", "reply on old chat")
+    titles = [c.title for c in crud.list_conversations(db, "session-order")]
+    assert titles[0] == "Old chat"  # latest activity wins
+    assert titles[1] == "New chat"
