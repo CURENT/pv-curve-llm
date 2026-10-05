@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+import os
 
 from web.backend.database.database import get_db
 from web.backend.database import crud
@@ -67,7 +68,7 @@ def list_plots(session_id: str, db: Session = Depends(get_db)):
             conversation_id=c.conversation_id,
             grid=c.grid,
             bus_id=c.bus_id,
-            plot_path=c.plot_path,
+            plot_path=f"/plots/{os.path.basename(c.plot_path)}" if c.plot_path else None,
             created_at=c.created_at,
         )
         for c in curves
