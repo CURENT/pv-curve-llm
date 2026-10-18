@@ -49,7 +49,7 @@ export interface PlotSummary {
   grid: string;
   bus_id: number;
   plot_path?: string | null;
-  create_at?: string | null;
+  created_at?: string | null;
 }
 
 

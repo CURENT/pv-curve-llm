@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAppStore } from "../../store/appStore";
 import { wsService } from "../../services/websocket";
 import MessageBubble from "./MessageBubble";
@@ -14,9 +15,28 @@ export default function ChatInterface() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom whenever new messages arrive
+  const focusAt = (useLocation().state as { focusAt?: string } | null)?.focusAt;
+  const didFocus = useRef(false);
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
+  
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (focusAt && !didFocus.current && messages.length > 0) {
+      const target = new Date(focusAt).getTime();
+      let index = -1;
+      messages.forEach((m, i) => {
+        if (m.role !== "assistant" || !m.timestamp) return;
+        if (new Date(m.timestamp).getTime() <= target) index = i;
+      });
+      didFocus.current = true;
+      setFocusIndex(index);
+      document.getElementById(`msg-${index}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      return;
+    }
+    if (!focusAt) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, focusAt]);
 
   function handleSend(text: string) {
     wsService.sendMessage(text, conversationId ?? undefined);
@@ -43,7 +63,13 @@ export default function ChatInterface() {
           <EmptyState />
         ) : (
           messages.map((msg, i) => (
-            <MessageBubble key={i} message={msg} />
+            <div
+              key={i}
+              id={`msg-${i}`}
+              className={i === focusIndex ? "rounded-xl ring-2 ring-indigo-400" : undefined}
+            >
+              <MessageBubble message={msg} />
+            </div>
           ))
         )}
 

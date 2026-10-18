@@ -46,7 +46,9 @@ export default function PlotsPage() {
         timestamp: m.timestamp ?? undefined,
       }))
     );
-    navigate("/chat");
+    navigate("/chat", {
+      state: { focusAt: plot.created_at, plotPath: plot.plot_path },
+    });
   }
 
   return (
@@ -183,8 +185,8 @@ function PlotViewer({
 
 function formatLabel(plot: PlotSummary) {
   const grid = plot.grid.replace("ieee", "IEEE ");
-  const date = plot.create_at
-    ? new Date(plot.create_at).toLocaleDateString("en-US", {
+  const date = plot.created_at
+    ? new Date(plot.created_at).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       })

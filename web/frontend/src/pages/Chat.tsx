@@ -9,7 +9,7 @@
  * On mobile the parameter panel slides in from the right.
  */
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import ChatInterface from "../components/Chat/ChatInterface";
 import ParameterPanel from "../components/Parameters/ParameterPanel";
 import PVCurvePlot from "../components/Visualization/PVCurvePlot";
@@ -21,17 +21,15 @@ export default function ChatPage() {
   const latestResult = useAppStore((s) => s.latestResult);
   const viewingPlotId = useAppStore((s) => s.viewingPlotId);
   const navigate = useNavigate();
-  const setViewingPlotId = useAppStore((s) => s.setViewingPlotId);
-  
-  function closePlotView() {
-    setViewingPlotId(null);
-    navigate("/plots");
-  }
+  const openedPlotPath = (
+    useLocation().state as { plotPath?: string } | null
+  )?.plotPath;
+
   // Close drawer on Escape key (keyboard accessibility)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== "Escape") return;
-      if (viewingPlotId) closePlotView();
+      if (openedPlotPath) navigate("/plots");
       else setSidebarOpen(false);
     }
     document.addEventListener("keydown", onKeyDown);
@@ -70,14 +68,18 @@ export default function ChatPage() {
               <div className="flex-1 flex flex-col border-b border-gray-200 dark:border-gray-700 min-h-0">
                 <div className="flex justify-end px-2 py-1">
                   <button
-                    onClick={closePlotView}
+                    onClick={() => navigate("/plots")}
                     className="text-xs px-2 py-1 rounded text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     Back
                   </button>
                 </div>
                 <div className="flex-1 min-h-0 overflow-y-auto">
-                  <PVCurvePlot />
+                  <img
+                    src={openedPlotPath}
+                    alt="PV curve"
+                    className="max-h-full max-w-full object-contain mx-auto"
+                  />
                 </div>
               </div>
               <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
