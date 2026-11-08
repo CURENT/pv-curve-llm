@@ -4,6 +4,7 @@ from agent.schemas.response import NodeResponse
 from agent.utils.context import get_conversation_context
 from agent.utils.display import display_executing_node, console
 from datetime import datetime
+from agent.utils.common_utils import fmt2, fmt_for_llm
 
 def analysis_agent(state: State, llm, prompts, retriever, generate_pv_curve):
     """
@@ -52,8 +53,8 @@ def analysis_agent(state: State, llm, prompts, retriever, generate_pv_curve):
                 comparison_context += f"\n**Previous Analysis {i}:**\n"
                 comparison_context += f"- Grid: {prev_results.get('grid_system', 'N/A')}\n"
                 comparison_context += f"- Bus: {prev_results.get('target_bus', 'N/A')}\n"
-                comparison_context += f"- Load Margin: {prev_results.get('load_margin_mw', 'N/A')} MW\n"
-                comparison_context += f"- Nose Point Voltage: {prev_results.get('nose_point', {}).get('voltage_pu', 'N/A')} pu\n"
+                comparison_context += f"- Load Margin: {fmt2(prev_results.get('load_margin_mw', 'N/A'))} MW\n"
+                comparison_context += f"- Nose Point Voltage: {fmt2(prev_results.get('nose_point', {}).get('voltage_pu', 'N/A'))} pu\n"
                 comparison_context += f"- Power Factor: {prev_inputs.get('power_factor', 'N/A')}\n"
                 comparison_context += f"- Load Type: {'Capacitive' if prev_inputs.get('capacitive', False) else 'Inductive'}\n"
                 comparison_context += f"- Converged Steps: {prev_results.get('converged_steps', 'N/A')}\n"
@@ -64,7 +65,7 @@ def analysis_agent(state: State, llm, prompts, retriever, generate_pv_curve):
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": prompts["analysis_agent"]["user"].format(
-            results=results,
+            results=fmt_for_llm(results),
             grid_system=results['grid_system'].upper()
         )}
     ]

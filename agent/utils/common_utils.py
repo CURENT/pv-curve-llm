@@ -77,3 +77,22 @@ def validate_state(state) -> dict[str, bool]:
         validations["step_in_bounds"] = state.get("current_step", 0) <= len(state["plan"].steps)
     
     return validations 
+
+def fmt2(value):
+    """Format a number to exactly 2 decimals. Pass through N/A / None."""
+    if value is None or value == "N/A":
+        return "N/A"
+    try:
+        return f"{float(value):.2f}"
+    except (TypeError, ValueError):
+        return str(value)
+
+def fmt_for_llm(obj):
+    """Recursively format floats to 2 decimals for LLM prompts only."""
+    if isinstance(obj, float):
+        return fmt2(obj)
+    if isinstance(obj, dict):
+        return {k: fmt_for_llm(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [fmt_for_llm(v) for v in obj]
+    return obj
